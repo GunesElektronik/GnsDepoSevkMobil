@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gns_warehouse/database/dbhelper.dart';
 import 'package:gns_warehouse/database/model/product_barcodes_item.dart';
 import 'package:gns_warehouse/models/new_api/order_change_qty_item_model.dart';
+import 'package:gns_warehouse/models/new_api/stock_response.dart';
 import 'package:gns_warehouse/models/order_detail/order_detail_item_db.dart';
 import 'package:gns_warehouse/models/order_detail_response.dart';
 import 'package:gns_warehouse/models/order_fast_service_item_body.dart';
@@ -42,6 +43,7 @@ class _OrderScanState extends State<OrderScan> {
   String errorPath = "sounds/error_sound.mp3";
   String completePath = "sounds/complete_sound.mp3";
   List<ProductBarcodesItemLocal>? productBarcodesLocalList = [];
+  StockResponse? stockResponse;
   @override
   void initState() {
     // TODO: implement initState
@@ -66,6 +68,44 @@ class _OrderScanState extends State<OrderScan> {
   _createApiRepository() async {
     apiRepository = await ApiRepository.create(context);
     productBarcodesLocalList = await _dbHelper.getProductBarcodes(widget.orderId);
+    _checkStockForEachRow();
+  }
+
+  _checkStockForEachRow() {
+    try {
+      apiRepository.getStockByProductIdList(_createStockByProductList()).then((response) {
+        // işlem tamamlanınca burası çalışacak
+        setState(() {
+          stockResponse = response;
+        });
+      }).catchError((e) {
+        // hata yönetimi
+        print("Hata: $e");
+      });
+    } catch (e) {
+      print("Try-catch hatası: $e");
+    }
+  }
+
+  String _getStockBasedOnProductId(String productId) {
+    if (stockResponse != null) {
+      if (stockResponse!.stocks != null) {
+        for (var stock in stockResponse!.stocks!) {
+          if (stock.productId?.toLowerCase() == productId.toLowerCase()) {
+            return stock.onHandStock.toString();
+          }
+        }
+      }
+    }
+    return "null";
+  }
+
+  List<String> _createStockByProductList() {
+    List<String> idList = [];
+    widget.orderDetailItemList!.forEach((element) {
+      idList.add(element.productId!);
+    });
+    return idList;
   }
 
   _showLoadingScreen(bool isLoading, String content) {
@@ -262,6 +302,10 @@ class _OrderScanState extends State<OrderScan> {
                         scannedTimes: _scannedTimes,
                         seriOrBarcode: seriOrBarcode,
                         productId: productId,
+                        stockCount: _getStockBasedOnProductId(item.productId!.toLowerCase()),
+                        onTapForNewStock: () {
+                          _checkStockForEachRow();
+                        },
                         errorHandler: (value) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             _showDialogMessage("Uyarı", value.toString());

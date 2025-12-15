@@ -23,6 +23,7 @@ class WayybillsRequestBodyNew {
   String? erpId;
   String? erpCode;
   String? projectId;
+  String? orderId;
   int? waybillTypeId;
   List<WaybillItemsNew>? waybillItems;
   List<GlobalWaybillItemDetails>? globalWaybillItemDetails;
@@ -52,6 +53,7 @@ class WayybillsRequestBodyNew {
     this.erpId,
     this.erpCode,
     this.projectId,
+    this.orderId,
     this.waybillTypeId,
     this.waybillItems,
     this.globalWaybillItemDetails,
@@ -82,6 +84,7 @@ class WayybillsRequestBodyNew {
     erpId = json['erpId'];
     erpCode = json['erpCode'];
     projectId = json['projectId'];
+    orderId = json['orderId'];
     waybillTypeId = json['waybillTypeId'];
     if (json['waybillItems'] != null) {
       waybillItems = <WaybillItemsNew>[];
@@ -123,13 +126,13 @@ class WayybillsRequestBodyNew {
     data['erpId'] = this.erpId;
     data['erpCode'] = this.erpCode;
     data['projectId'] = this.projectId;
+    data['orderId'] = this.orderId;
     data['waybillTypeId'] = this.waybillTypeId;
     if (this.waybillItems != null) {
       data['waybillItems'] = this.waybillItems!.map((v) => v.toJson()).toList();
     }
     if (this.globalWaybillItemDetails != null) {
-      data['globalWaybillItemDetails'] =
-          this.globalWaybillItemDetails!.map((v) => v.toJson()).toList();
+      data['globalWaybillItemDetails'] = this.globalWaybillItemDetails!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -137,6 +140,7 @@ class WayybillsRequestBodyNew {
 
 class WaybillItemsNew {
   String? productId;
+  String? orderLineId;
   String? description;
   String? warehouseId;
   double? productPrice;
@@ -159,6 +163,7 @@ class WaybillItemsNew {
 
   WaybillItemsNew({
     this.productId,
+    this.orderLineId,
     this.description,
     this.warehouseId,
     this.productPrice,
@@ -182,6 +187,7 @@ class WaybillItemsNew {
 
   WaybillItemsNew.fromJson(Map<String, dynamic> json) {
     productId = json['productId'];
+    orderLineId = json['orderLineId'];
     description = json['description_'];
     warehouseId = json['warehouseId'];
     productPrice = json['productPrice'];
@@ -216,6 +222,7 @@ class WaybillItemsNew {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['productId'] = this.productId;
+    data['orderLineId'] = this.orderLineId;
     data['description_'] = this.description;
     data['warehouseId'] = this.warehouseId;
     data['productPrice'] = this.productPrice;
@@ -227,8 +234,7 @@ class WaybillItemsNew {
     data['unitId'] = this.unitId;
     data['unitConversionId'] = this.unitConversionId;
     if (this.stockLocationRelations != null) {
-      data['stockLocationRelations'] =
-          this.stockLocationRelations!.map((v) => v.toJson()).toList();
+      data['stockLocationRelations'] = this.stockLocationRelations!.map((v) => v.toJson()).toList();
     }
     data['currencyId'] = this.currencyId;
     data['erpId'] = this.erpId;
@@ -238,8 +244,7 @@ class WaybillItemsNew {
     data['erpOrderReferance'] = this.erpOrderReferance;
     data['waybillItemTypeId'] = this.waybillItemTypeId;
     if (this.waybillItemDetails != null) {
-      data['waybillItemDetails'] =
-          this.waybillItemDetails!.map((v) => v.toJson()).toList();
+      data['waybillItemDetails'] = this.waybillItemDetails!.map((v) => v.toJson()).toList();
     }
     return data;
   }

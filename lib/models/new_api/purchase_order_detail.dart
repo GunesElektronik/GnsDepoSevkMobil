@@ -4,9 +4,7 @@ class PurchaseOrderDetailResponse {
   PurchaseOrderDetailResponse({this.order});
 
   PurchaseOrderDetailResponse.fromJson(Map<String, dynamic> json) {
-    order = json['order'] != null
-        ? new PurchaseOrderDetail.fromJson(json['order'])
-        : null;
+    order = json['order'] != null ? new PurchaseOrderDetail.fromJson(json['order']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -95,9 +93,7 @@ class PurchaseOrderDetail {
 
   PurchaseOrderDetail.fromJson(Map<String, dynamic> json) {
     orderId = json['orderId'];
-    customer = json['customer'] != null
-        ? new Customer.fromJson(json['customer'])
-        : null;
+    customer = json['customer'] != null ? new Customer.fromJson(json['customer']) : null;
     moveType = json['moveType'];
     transactionTypeId = json['transactionTypeId'];
     transactionTypeName = json['transactionTypeName'];
@@ -105,36 +101,21 @@ class PurchaseOrderDetail {
     ficheDate = json['ficheDate'];
     ficheTime = json['ficheTime'];
     docNo = json['docNo'];
-    workplace = json['workplace'] != null
-        ? new Workplace.fromJson(json['workplace'])
-        : null;
-    department = json['department'] != null
-        ? new Department.fromJson(json['department'])
-        : null;
-    warehouse = json['warehouse'] != null
-        ? new Warehouse.fromJson(json['warehouse'])
-        : null;
+    workplace = json['workplace'] != null ? new Workplace.fromJson(json['workplace']) : null;
+    department = json['department'] != null ? new Department.fromJson(json['department']) : null;
+    warehouse = json['warehouse'] != null ? new Warehouse.fromJson(json['warehouse']) : null;
     currencyId = json['currencyId'];
     currencyName = json['currencyName'];
     totaldiscounted = json['totaldiscounted'];
     totalvat = json['totalvat'];
     grossTotal = json['grossTotal'];
-    transporter = json['transporter'] != null
-        ? new Transporter.fromJson(json['transporter'])
-        : null;
-    shippingAccount = json['shippingAccount'] != null
-        ? new Customer.fromJson(json['shippingAccount'])
-        : null;
-    shippingAddress = json['shippingAddress'] != null
-        ? new ShippingAddress.fromJson(json['shippingAddress'])
-        : null;
+    transporter = json['transporter'] != null ? new Transporter.fromJson(json['transporter']) : null;
+    shippingAccount = json['shippingAccount'] != null ? new Customer.fromJson(json['shippingAccount']) : null;
+    shippingAddress = json['shippingAddress'] != null ? new ShippingAddress.fromJson(json['shippingAddress']) : null;
     description = json['description_'];
-    orderShippingType = json['orderShippingType'] != null
-        ? new OrderShippingType.fromJson(json['orderShippingType'])
-        : null;
-    salesman = json['salesman'] != null
-        ? new PurchaseOrderSalesman.fromJson(json['salesman'])
-        : null;
+    orderShippingType =
+        json['orderShippingType'] != null ? new OrderShippingType.fromJson(json['orderShippingType']) : null;
+    salesman = json['salesman'] != null ? new PurchaseOrderSalesman.fromJson(json['salesman']) : null;
     isAssing = json['isAssing'];
     assingmentEmail = json['assingmentEmail'];
     assingCode = json['assingCode'];
@@ -156,8 +137,7 @@ class PurchaseOrderDetail {
     }
     payPlan = json['payPlan'];
     specode = json['specode'];
-    project =
-        json['project'] != null ? new Project.fromJson(json['project']) : null;
+    project = json['project'] != null ? new Project.fromJson(json['project']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -211,8 +191,7 @@ class PurchaseOrderDetail {
       data['orderItems'] = this.orderItems!.map((v) => v.toJson()).toList();
     }
     if (this.globalOrderItemDetails != null) {
-      data['globalOrderItemDetails'] =
-          this.globalOrderItemDetails!.map((v) => v.toJson()).toList();
+      data['globalOrderItemDetails'] = this.globalOrderItemDetails!.map((v) => v.toJson()).toList();
     }
     data['payPlan'] = this.payPlan;
     data['specode'] = this.specode;
@@ -230,21 +209,14 @@ class Customer {
   bool? isPartialOrder;
   Salesman? salesman;
 
-  Customer(
-      {this.customerId,
-      this.code,
-      this.name,
-      this.isPartialOrder,
-      this.salesman});
+  Customer({this.customerId, this.code, this.name, this.isPartialOrder, this.salesman});
 
   Customer.fromJson(Map<String, dynamic> json) {
     customerId = json['customerId'];
     code = json['code'];
     name = json['name'];
     isPartialOrder = json['isPartialOrder'];
-    salesman = json['salesman'] != null
-        ? new Salesman.fromJson(json['salesman'])
-        : null;
+    salesman = json['salesman'] != null ? new Salesman.fromJson(json['salesman']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -354,8 +326,7 @@ class Transporter {
   String? description;
   String? identityOrTax;
 
-  Transporter(
-      {this.transporterId, this.code, this.description, this.identityOrTax});
+  Transporter({this.transporterId, this.code, this.description, this.identityOrTax});
 
   Transporter.fromJson(Map<String, dynamic> json) {
     transporterId = json['transporterId'];
@@ -474,6 +445,7 @@ class PurchaseOrderSalesman {
 class OrderItems {
   String? orderItemId;
   Product? product;
+  int? lineNr;
   int? productItemTypeId;
   int? transactionTypeId;
   String? description;
@@ -498,6 +470,7 @@ class OrderItems {
   OrderItems({
     this.orderItemId,
     this.product,
+    this.lineNr,
     this.productItemTypeId,
     this.transactionTypeId,
     this.description,
@@ -522,8 +495,8 @@ class OrderItems {
 
   OrderItems.fromJson(Map<String, dynamic> json) {
     orderItemId = json['orderItemId'];
-    product =
-        json['product'] != null ? new Product.fromJson(json['product']) : null;
+    product = json['product'] != null ? new Product.fromJson(json['product']) : null;
+    lineNr = json['lineNr'];
     productItemTypeId = json['productItemTypeId'];
     transactionTypeId = json['transactionTypeId'];
     description = json['description_'];
@@ -548,8 +521,7 @@ class OrderItems {
         orderItemDetails!.add(new OrderItemDetails.fromJson(v));
       });
     }
-    project =
-        json['project'] != null ? new Project.fromJson(json['project']) : null;
+    project = json['project'] != null ? new Project.fromJson(json['project']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -558,6 +530,7 @@ class OrderItems {
     if (this.product != null) {
       data['product'] = this.product!.toJson();
     }
+    data['lineNr'] = this.lineNr;
     data['productItemTypeId'] = this.productItemTypeId;
     data['transactionTypeId'] = this.transactionTypeId;
     data['description_'] = this.description;
@@ -577,8 +550,7 @@ class OrderItems {
     data['erpId'] = this.erpId;
     data['erpCode'] = this.erpCode;
     if (this.orderItemDetails != null) {
-      data['orderItemDetails'] =
-          this.orderItemDetails!.map((v) => v.toJson()).toList();
+      data['orderItemDetails'] = this.orderItemDetails!.map((v) => v.toJson()).toList();
     }
     if (this.project != null) {
       data['project'] = this.project!.toJson();
@@ -749,8 +721,7 @@ class Project {
   String? erpId;
   String? erpCode;
 
-  Project(
-      {this.projectId, this.code, this.definition, this.erpId, this.erpCode});
+  Project({this.projectId, this.code, this.definition, this.erpId, this.erpCode});
 
   Project.fromJson(Map<String, dynamic> json) {
     projectId = json['projectId'];

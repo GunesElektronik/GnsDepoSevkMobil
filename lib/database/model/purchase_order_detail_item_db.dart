@@ -14,6 +14,7 @@ class PurchaseOrderDetailItemDB {
   int? scannedQty;
   int? qty;
   int? shippedQty;
+  int? lineNr;
 
   PurchaseOrderDetailItemDB({
     this.purchaseOrderId,
@@ -31,6 +32,7 @@ class PurchaseOrderDetailItemDB {
     this.scannedQty,
     this.qty,
     this.shippedQty,
+    this.lineNr,
   });
 
   PurchaseOrderDetailItemDB.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class PurchaseOrderDetailItemDB {
     scannedQty = json['scannedQty'];
     qty = json['qty'];
     shippedQty = json['shippedQty'];
+    lineNr = json['lineNr'];
   }
 
   Map<String, dynamic> toJson() {
@@ -68,6 +71,7 @@ class PurchaseOrderDetailItemDB {
     data['scannedQty'] = this.scannedQty;
     data['qty'] = this.qty;
     data['shippedQty'] = this.shippedQty;
+    data['lineNr'] = this.lineNr;
 
     return data;
   }

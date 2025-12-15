@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gns_warehouse/pages/home.dart';
 import 'package:gns_warehouse/pages/login.dart';
 import 'package:gns_warehouse/pages/splash_screen/gns_splash_screen.dart';
 import 'package:gns_warehouse/pages/startpage.dart';
-import 'package:gns_warehouse/repositories/apirepository.dart';
 import 'package:gns_warehouse/services/sharedpreferences.dart';
 
 void main() {
@@ -21,13 +19,10 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   Future<int> checkAuth() async {
-    String apiUrl =
-        await ServiceSharedPreferences.getSharedString("apiUrl") ?? "";
+    String apiUrl = await ServiceSharedPreferences.getSharedString("apiUrl") ?? "";
     // String jwtToken =
     //     await ServiceSharedPreferences.getSharedString("jwtToken") ?? "";
-    String employeeUsername =
-        await ServiceSharedPreferences.getSharedString("EmployeeUsername") ??
-            "";
+    String employeeUsername = await ServiceSharedPreferences.getSharedString("EmployeeUsername") ?? "";
 
     if (apiUrl.isNotEmpty && employeeUsername.isNotEmpty) {
       return 2;
@@ -38,8 +33,7 @@ class MyApp extends StatelessWidget {
   }
 
   void hideSystemUI() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky,
-        overlays: []);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky, overlays: []);
   }
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -57,8 +51,7 @@ class MyApp extends StatelessWidget {
             color: Colors.amber,
           ),
           floatingActionButtonTheme: FloatingActionButtonThemeData(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
           )
 
           //primarySwatch: Colors.brown,

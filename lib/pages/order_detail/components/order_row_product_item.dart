@@ -13,15 +13,18 @@ import 'package:gns_warehouse/repositories/apirepository.dart';
 class OrderProductItemRow extends StatefulWidget {
   OrderProductItemRow({
     super.key,
+    required this.stockCount,
     required this.item,
     required this.index,
     required this.scannedBarcode,
     required this.scannedTimes,
     required this.seriOrBarcode,
     required this.errorHandler,
+    required this.onTapForNewStock,
     this.productId,
   });
 
+  String stockCount;
   OrderDetailItemDB item;
   int index;
   String scannedBarcode;
@@ -29,6 +32,7 @@ class OrderProductItemRow extends StatefulWidget {
   String seriOrBarcode;
   String? productId;
   final ValueChanged<String?> errorHandler;
+  final VoidCallback onTapForNewStock;
   @override
   State<OrderProductItemRow> createState() => _OrderProductItemRowState();
 }
@@ -80,8 +84,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
       widget.scannedTimes = 1;
     }
     //print("değer: ${widget.scannedTimes}");
-    if (widget.productId == widget.item.productId &&
-        deneme + widget.scannedTimes <= widget.item.qty!) {
+    if (widget.productId == widget.item.productId && deneme + widget.scannedTimes <= widget.item.qty!) {
       //barkod listede yok ama çoklu okuttu
       if (whichTabBarActive == itemType) {
         if (widget.item.isExceededStockCount!) {
@@ -95,8 +98,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
       }
     } else {
       //listede barkod varsa buraya girer
-      if (widget.scannedBarcode == widget.item.productBarcode &&
-          deneme + widget.scannedTimes <= widget.item.qty!) {
+      if (widget.scannedBarcode == widget.item.productBarcode && deneme + widget.scannedTimes <= widget.item.qty!) {
         if (whichTabBarActive == itemType) {
           if (widget.item.isExceededStockCount!) {
             widget.errorHandler("Bu barkodlu ürün stok sayısını aşmıştır");
@@ -133,29 +135,25 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
         widget.item.warehouse!);
     // orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(
     //     widget.item.ficheNo!, widget.item.orderItemId!, widget.item.warehouse!);
-    orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(
-        widget.item.ficheNo!, widget.item.orderItemId!);
+    orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(widget.item.ficheNo!, widget.item.orderItemId!);
     deneme += widget.scannedTimes;
-    await _dbHelper.updateOrderDetailItemScannedQty(deneme,
-        widget.item.ficheNo!, widget.item.orderItemId!, widget.item.warehouse!);
+    await _dbHelper.updateOrderDetailItemScannedQty(
+        deneme, widget.item.ficheNo!, widget.item.orderItemId!, widget.item.warehouse!);
     setState(() {});
   }
 
   _deneme2(OrderDetailScannedItemDB item) async {
-    await _dbHelper.clearOrderDetailScannedItem(
-        item.recid!, item.ficheNo!, item.orderItemId!);
-    orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(
-        widget.item.ficheNo!, widget.item.orderItemId!);
+    await _dbHelper.clearOrderDetailScannedItem(item.recid!, item.ficheNo!, item.orderItemId!);
+    orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(widget.item.ficheNo!, widget.item.orderItemId!);
     deneme -= item.numberOfPieces!;
-    await _dbHelper.updateOrderDetailItemScannedQty(deneme,
-        widget.item.ficheNo!, widget.item.orderItemId!, widget.item.warehouse!);
+    await _dbHelper.updateOrderDetailItemScannedQty(
+        deneme, widget.item.ficheNo!, widget.item.orderItemId!, widget.item.warehouse!);
     setState(() {});
   }
 
   deneme3() async {
     deneme = widget.item.scannedQty!;
-    orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(
-        widget.item.ficheNo!, widget.item.orderItemId!);
+    orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(widget.item.ficheNo!, widget.item.orderItemId!);
     firstLoad = true;
     setState(() {});
   }
@@ -163,17 +161,13 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
   _getStockInfo() async {
     apiRepository = await ApiRepository.create(context);
     try {
-      response =
-          await apiRepository.getProductStockWarehouse(widget.item.productId!);
+      response = await apiRepository.getProductStockWarehouse(widget.item.productId!);
 
       if (isProductLocatin) {
-        locationResponse =
-            await apiRepository.getProductLocationList(widget.item.productId!);
-        stockLocationName =
-            locationResponse.productLocations![0].stockLocation!.name!;
+        locationResponse = await apiRepository.getProductLocationList(widget.item.productId!);
+        stockLocationName = locationResponse.productLocations![0].stockLocation!.name!;
 
-        stockLocationId = locationResponse
-            .productLocations![0].stockLocation!.stockLocationId!;
+        stockLocationId = locationResponse.productLocations![0].stockLocation!.stockLocationId!;
       }
       setState(() {
         isLocationResponseFetched = true;
@@ -204,14 +198,8 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
 
   _getScannedListFromDB2() async {
     if (!_isAddNewItemRow) {
-      await _dbHelper.addOrderDetailScannedItem(
-          widget.item.ficheNo!,
-          widget.item.productBarcode!,
-          widget.scannedTimes,
-          widget.item.orderItemId!,
-          stockLocationId,
-          stockLocationName,
-          widget.item.warehouse!);
+      await _dbHelper.addOrderDetailScannedItem(widget.item.ficheNo!, widget.item.productBarcode!, widget.scannedTimes,
+          widget.item.orderItemId!, stockLocationId, stockLocationName, widget.item.warehouse!);
       orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(
         widget.item.ficheNo!,
         widget.item.productBarcode!,
@@ -219,10 +207,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
       _isAddNewItemRow = true;
       deneme += widget.scannedTimes;
       await _dbHelper.updateOrderDetailItemScannedQty(
-          deneme,
-          widget.item.ficheNo!,
-          widget.item.productBarcode!,
-          widget.item.warehouse!);
+          deneme, widget.item.ficheNo!, widget.item.productBarcode!, widget.item.warehouse!);
       setState(() {});
     } else {
       _isAddNewItemRow = false;
@@ -231,8 +216,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
 
   _deleteRow(OrderDetailScannedItemDB item) async {
     if (!_isAddNewItemRow) {
-      await _dbHelper.clearOrderDetailScannedItem(
-          item.recid!, item.ficheNo!, item.productBarcode!);
+      await _dbHelper.clearOrderDetailScannedItem(item.recid!, item.ficheNo!, item.productBarcode!);
       orderDetailScannedItems = await _dbHelper.getOrderDetailScannedItem(
         widget.item.ficheNo!,
         widget.item.productBarcode!,
@@ -240,10 +224,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
       _isAddNewItemRow = true;
       deneme -= item.numberOfPieces!;
       await _dbHelper.updateOrderDetailItemScannedQty(
-          deneme,
-          widget.item.ficheNo!,
-          widget.item.productBarcode!,
-          widget.item.warehouse!);
+          deneme, widget.item.ficheNo!, widget.item.productBarcode!, widget.item.warehouse!);
       setState(() {});
       _isAddNewItemRow = false;
     }
@@ -289,8 +270,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
             ]),
             child: Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                    10.0), // Köşeleri yuvarlatılmış bir kart
+                borderRadius: BorderRadius.circular(10.0), // Köşeleri yuvarlatılmış bir kart
               ),
               color: widget.item.isExceededStockCount!
                   ? const Color.fromARGB(255, 255, 173, 173)
@@ -315,8 +295,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                     (widget.index + 1 < 10)
                         ? "0${widget.index + 1} ${serilotType(itemType)}"
                         : "${widget.index + 1} ${serilotType(itemType)}",
-                    style: _textStyle(
-                        17, FontWeight.normal, const Color(0xff707070)),
+                    style: _textStyle(17, FontWeight.normal, const Color(0xff707070)),
                   ),
                   subtitle: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -328,14 +307,16 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                             "${widget.item.productBarcode}",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: _textStyle(
-                                15, FontWeight.w700, const Color(0xff727272)),
+                            style: _textStyle(15, FontWeight.w700, const Color(0xff727272)),
                           ),
                           Text(
                             "${widget.item.productName}",
-                            style: _textStyle(
-                                14, FontWeight.normal, const Color(0xff707070)),
+                            style: _textStyle(14, FontWeight.normal, const Color(0xff707070)),
                           ),
+                          widget.stockCount == "null"
+                              ? const SizedBox.shrink()
+                              : InkWell(
+                                  onTap: widget.onTapForNewStock, child: Text("Stok sayısı: ${widget.stockCount}")),
                           isProductLocatin
                               ? IconButton(
                                   icon: const Icon(Icons.warehouse_outlined),
@@ -353,15 +334,13 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                                           _selectLocation();
                                         }
                                       : null,
-                                  iconSize:
-                                      25.0, // İkonun boyutunu buradan küçültebilirsin
+                                  iconSize: 25.0, // İkonun boyutunu buradan küçültebilirsin
                                 )
                               : const SizedBox(),
                           isProductLocatin
                               ? Text(
                                   stockLocationName,
-                                  style: _textStyle(14, FontWeight.normal,
-                                      const Color(0xff707070)),
+                                  style: _textStyle(14, FontWeight.normal, const Color(0xff707070)),
                                 )
                               : const SizedBox(),
                         ],
@@ -370,8 +349,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                         children: [
                           Text(
                             "${_numberOfScannedItems()}",
-                            style:
-                                _textStyle(20, FontWeight.bold, Colors.green),
+                            style: _textStyle(20, FontWeight.bold, Colors.green),
                           ),
                           Text(
                             "$deneme / ${widget.item.qty}",
@@ -716,22 +694,19 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                   children: [
                     Text(
                       "${item.productBarcode}",
-                      style: const TextStyle(
-                          fontSize: 17, color: Color(0xff727272)),
+                      style: const TextStyle(fontSize: 17, color: Color(0xff727272)),
                     ),
                     widget.item.isProductLocatin!
                         ? Text(
                             "${item.stockLocationName}",
-                            style: const TextStyle(
-                                fontSize: 14, color: Color(0xff727272)),
+                            style: const TextStyle(fontSize: 14, color: Color(0xff727272)),
                           )
                         : const SizedBox(),
                   ],
                 ),
                 Text(
                   "${item.numberOfPieces}",
-                  style:
-                      const TextStyle(fontSize: 17, color: Color(0xff727272)),
+                  style: const TextStyle(fontSize: 17, color: Color(0xff727272)),
                 ),
               ],
             ),
@@ -758,9 +733,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                       Text(
                         "${item.warehouseName}",
                         style: const TextStyle(
-                            fontSize: 17,
-                            color: Color.fromARGB(255, 44, 71, 87),
-                            fontWeight: FontWeight.bold),
+                            fontSize: 17, color: Color.fromARGB(255, 44, 71, 87), fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -772,9 +745,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                   "${item.quantity}",
                   textAlign: TextAlign.end,
                   style: const TextStyle(
-                      fontSize: 17,
-                      color: Color.fromARGB(255, 44, 71, 87),
-                      fontWeight: FontWeight.bold),
+                      fontSize: 17, color: Color.fromARGB(255, 44, 71, 87), fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -814,8 +785,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
         children: [
           Card(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  10.0), // Köşeleri yuvarlatılmış bir kart
+              borderRadius: BorderRadius.circular(10.0), // Köşeleri yuvarlatılmış bir kart
             ),
             color: const Color(0xfff1f1f1),
             elevation: 0,
@@ -835,9 +805,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                               item: widget.item,
                             ))).then((value) async {
                   var results = await _dbHelper.getOrderDetailItem(
-                      widget.item.ficheNo!,
-                      widget.item.orderItemId!,
-                      widget.item.warehouse!);
+                      widget.item.ficheNo!, widget.item.orderItemId!, widget.item.warehouse!);
                   widget.item = results!;
                   deneme = widget.item.scannedQty!;
                   setState(() {});
@@ -850,25 +818,21 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                   (widget.index + 1 < 10)
                       ? "0${widget.index + 1} ${serilotType(itemType)}"
                       : "${widget.index + 1} ${serilotType(itemType)}",
-                  style: _textStyle(
-                      17, FontWeight.normal, const Color(0xff707070)),
+                  style: _textStyle(17, FontWeight.normal, const Color(0xff707070)),
                 ),
                 trailing: Text(
                   "$deneme / ${widget.item.qty}",
-                  style: _textStyle(20, FontWeight.bold,
-                      selectColor(deneme, widget.item.qty!)),
+                  style: _textStyle(20, FontWeight.bold, selectColor(deneme, widget.item.qty!)),
                 ),
                 title: Text(
                   "${widget.item.productBarcode}",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style:
-                      _textStyle(15, FontWeight.w700, const Color(0xff727272)),
+                  style: _textStyle(15, FontWeight.w700, const Color(0xff727272)),
                 ),
                 subtitle: Text(
                   "${widget.item.productName}",
-                  style: _textStyle(
-                      14, FontWeight.normal, const Color(0xff707070)),
+                  style: _textStyle(14, FontWeight.normal, const Color(0xff707070)),
                 ),
               ),
             ),
@@ -883,8 +847,7 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
 
     for (var item in orderDetailScannedItems!) {
       if (groupedItems.containsKey(item.stockLocationName)) {
-        groupedItems[item.stockLocationName!] =
-            groupedItems[item.stockLocationName]! + (item.numberOfPieces ?? 0);
+        groupedItems[item.stockLocationName!] = groupedItems[item.stockLocationName]! + (item.numberOfPieces ?? 0);
       } else {
         groupedItems[item.stockLocationName!] = item.numberOfPieces ?? 0;
       }
@@ -918,44 +881,37 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Geçmiş İşlemler",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: groupedItems.length,
-                        itemBuilder: (context, index) {
-                          String stockLocationName =
-                              groupedItems.keys.elementAt(index);
-                          int totalPieces = groupedItems[stockLocationName]!;
-                          return Column(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: groupedItems.length,
+                    itemBuilder: (context, index) {
+                      String stockLocationName = groupedItems.keys.elementAt(index);
+                      int totalPieces = groupedItems[stockLocationName]!;
+                      return Column(
+                        children: [
+                          // _column(orderDetailScannedItems![index]),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // _column(orderDetailScannedItems![index]),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(stockLocationName),
-                                  Text(totalPieces.toString()),
-                                ],
-                              ),
-                              _divider(),
+                              Text(stockLocationName),
+                              Text(totalPieces.toString()),
                             ],
-                          );
-                        },
-                      )
-                    ]),
+                          ),
+                          _divider(),
+                        ],
+                      );
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -1001,43 +957,29 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Lokasyon Seçin",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: locationResponse.productLocations!.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(
-                              locationResponse.productLocations![index]
-                                  .stockLocation!.name!, () async {
-                            stockLocationName = locationResponse
-                                .productLocations![index].stockLocation!.name!;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: locationResponse.productLocations!.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(locationResponse.productLocations![index].stockLocation!.name!,
+                          () async {
+                        stockLocationName = locationResponse.productLocations![index].stockLocation!.name!;
 
-                            stockLocationId = locationResponse
-                                .productLocations![index]
-                                .stockLocation!
-                                .stockLocationId!;
+                        stockLocationId = locationResponse.productLocations![index].stockLocation!.stockLocationId!;
 
-                            await _dbHelper.updateOrderLocationArea(
-                                stockLocationId,
-                                stockLocationName,
-                                widget.item.orderId!,
-                                widget.item.orderItemId!,
-                                widget.item.warehouse!);
-                            Navigator.pop(context);
-                            setState(() {});
+                        await _dbHelper.updateOrderLocationArea(stockLocationId, stockLocationName,
+                            widget.item.orderId!, widget.item.orderItemId!, widget.item.warehouse!);
+                        Navigator.pop(context);
+                        setState(() {});
 /*
                             Navigator.pop(context);
                             showModalBottomSheet(
@@ -1050,10 +992,10 @@ class _OrderProductItemRowState extends State<OrderProductItemRow> {
                               });
                             });
                             */
-                          });
-                        },
-                      )
-                    ]),
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],

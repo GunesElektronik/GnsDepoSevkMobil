@@ -4,8 +4,7 @@ import 'package:gns_warehouse/pages/waybills/waybills_order_detail.dart';
 import 'package:intl/intl.dart';
 
 class WaybillsOrderList extends StatefulWidget {
-  WaybillsOrderList(
-      {super.key, required this.response, required this.addMoreButtonClicked});
+  WaybillsOrderList({super.key, required this.response, required this.addMoreButtonClicked});
 
   @override
   State<WaybillsOrderList> createState() => _WaybillsOrderListState();
@@ -85,8 +84,7 @@ class _WaybillsOrderListState extends State<WaybillsOrderList> {
       padding: const EdgeInsets.only(top: 10),
       child: Container(
         decoration: BoxDecoration(
-            color:
-                _getColorBasedOnErpSendMessage(item.erpSendMessage.toString()),
+            color: _getColorBasedOnErpSendMessage(item.erpSendMessage.toString()),
             borderRadius: BorderRadius.circular(8)),
         child: ListTile(
           contentPadding: const EdgeInsets.all(6),
@@ -109,54 +107,49 @@ class _WaybillsOrderListState extends State<WaybillsOrderList> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
           ),
           subtitle: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "${item.customer}",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
-              RichText(
-                text: TextSpan(
-                  style: const TextStyle(fontSize: 10, color: Colors.black),
-                  children: <TextSpan>[
-                    const TextSpan(
-                        text: 'Depo ',
-                        style: TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.bold)),
-                    TextSpan(
-                        text: '${item.warehouse}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                        )),
-                  ],
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      const TextSpan(
-                        text: "Fiş Numarası: ",
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold), // Kalın metin stili
-                      ),
-                      TextSpan(
-                        text: item.orderFicheNo!,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400), // Normal metin stili
-                      ),
-                    ],
-                    style: const TextStyle(
-                        color: Colors.black), // Genel metin stili
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "D: ",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
-                ),
+                  Flexible(
+                    flex: 1,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Text(
+                        "${item.warehouse}",
+                        style: const TextStyle(fontSize: 13),
+                        softWrap: false,
+                        overflow: TextOverflow.visible,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    "F.No: ",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                  Flexible(
+                    flex: 2,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Text(
+                        item.orderFicheNo!,
+                        style: const TextStyle(fontSize: 13),
+                        softWrap: false,
+                        overflow: TextOverflow.visible,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                "Tarih: ${DateFormat('dd-MM-yyyy').format(DateTime.parse(item.ficheDate!))} Saat: ${DateFormat('HH:mm:ss').format(DateTime.parse(item.ficheDate!))}",
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -180,8 +173,7 @@ class _WaybillsOrderListState extends State<WaybillsOrderList> {
                     builder: (context) => WaybillOrderDetail(
                           waybillId: item.waybillId!,
                           erpSendMessage: item.erpSendMessage.toString(),
-                          erpColor: _getColorBasedOnErpSendMessage(
-                              item.erpSendMessage.toString()),
+                          erpColor: _getColorBasedOnErpSendMessage(item.erpSendMessage.toString()),
                         ))).then((value) async {});
           },
           onLongPress: () {},

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gns_warehouse/constants/custom_colors.dart';
+import 'package:gns_warehouse/constants/customer_address_type.dart';
 import 'package:gns_warehouse/models/new_api/customer_addresses_response.dart';
 import 'package:gns_warehouse/models/new_api/new_customer_list_response.dart';
 import 'package:gns_warehouse/pages/warehouse_transfer/components/bottom_sheets/gns_whs_trs_customer_bottom.dart';
@@ -13,19 +14,19 @@ class GNSSelectCustomerAndAddress extends StatefulWidget {
     required this.isErrorActiveForCustomerAddress,
     required this.response,
     required this.onValueChanged,
+    required this.addressType,
   });
 
   NewCustomerListResponse response;
   final bool isErrorActiveForCustomer;
   final bool isErrorActiveForCustomerAddress;
   final ValueChanged<CustomerAndAddress> onValueChanged;
+  final CustomerAddressType addressType;
   @override
-  State<GNSSelectCustomerAndAddress> createState() =>
-      _GNSSelectCustomerAndAddressState();
+  State<GNSSelectCustomerAndAddress> createState() => _GNSSelectCustomerAndAddressState();
 }
 
-class _GNSSelectCustomerAndAddressState
-    extends State<GNSSelectCustomerAndAddress> {
+class _GNSSelectCustomerAndAddressState extends State<GNSSelectCustomerAndAddress> {
   late ApiRepository apiRepository;
   //int customerPage = 1;
 
@@ -55,6 +56,8 @@ class _GNSSelectCustomerAndAddressState
   void initState() {
     super.initState();
     //scrollController.addListener(_scrollListener);
+    customerAddressNameInit = getCustomerAddressTypeText();
+    customerAddressName = getCustomerAddressTypeText();
     isErrorActiveForCustomer = widget.isErrorActiveForCustomer;
     isErrorActiveForCustomerAddress = widget.isErrorActiveForCustomerAddress;
     _createApiRepository();
@@ -68,10 +71,20 @@ class _GNSSelectCustomerAndAddressState
       setState(() {});
     }
 
-    if (oldWidget.isErrorActiveForCustomerAddress !=
-        widget.isErrorActiveForCustomerAddress) {
+    if (oldWidget.isErrorActiveForCustomerAddress != widget.isErrorActiveForCustomerAddress) {
       isErrorActiveForCustomerAddress = widget.isErrorActiveForCustomerAddress;
       setState(() {});
+    }
+  }
+
+  String getCustomerAddressTypeText() {
+    switch (widget.addressType) {
+      case CustomerAddressType.shippingAddress:
+        return "Sevk Adresi";
+      case CustomerAddressType.invoiceAddress:
+        return "Fatura Adresi";
+      case CustomerAddressType.both:
+        return "Adres";
     }
   }
 
@@ -98,8 +111,7 @@ class _GNSSelectCustomerAndAddressState
     return isFetched
         ? Column(
             children: [
-              _row(customerName, customerNameInit, isErrorActiveForCustomer,
-                  () {
+              _row(customerName, customerNameInit, isErrorActiveForCustomer, () {
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
@@ -114,22 +126,17 @@ class _GNSSelectCustomerAndAddressState
                     onValueChanged: (value) async {
                       customerName = value.customerName;
                       customerId = value.customerId;
-                      customerAddressName = "Sevk Adresi";
+                      customerAddressName = getCustomerAddressTypeText();
                       customerAddressId = "";
 
                       _showLoadingScreen(true, "Yükleniyor...");
-                      customerAddressesResponse =
-                          await apiRepository.getCustomerAddresses(customerId);
+                      customerAddressesResponse = await apiRepository.getCustomerAddresses(customerId);
                       if (customerAddressesResponse != null) {
                         if (customerAddressesResponse!.addresses != null) {
-                          if (customerAddressesResponse!.addresses!.length ==
-                              1) {
-                            customerAddressName =
-                                customerAddressesResponse!.addresses![0].name!;
-                            customerAddressId = customerAddressesResponse!
-                                .addresses![0].customerAddressId!;
-                            addressDetail = customerAddressesResponse!
-                                .addresses![0].description!;
+                          if (customerAddressesResponse!.addresses!.length == 1) {
+                            customerAddressName = customerAddressesResponse!.addresses![0].name!;
+                            customerAddressId = customerAddressesResponse!.addresses![0].customerAddressId!;
+                            addressDetail = customerAddressesResponse!.addresses![0].description!;
                           }
                         }
                       }
@@ -151,9 +158,7 @@ class _GNSSelectCustomerAndAddressState
                       () {
                         showModalBottomSheet(
                           context: context,
-                          builder: (context) =>
-                              _customerAddressesListBottomSheet(
-                                  customerAddressesResponse!),
+                          builder: (context) => _customerAddressesListBottomSheet(customerAddressesResponse!),
                         );
                       },
                     )
@@ -173,8 +178,7 @@ class _GNSSelectCustomerAndAddressState
                           color: Colors.black, // Çerçeve rengi
                           width: 1.0, // Çerçeve kalınlığı
                         ),
-                        borderRadius:
-                            BorderRadius.circular(5), // Köşe yuvarlama
+                        borderRadius: BorderRadius.circular(5), // Köşe yuvarlama
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(5.0),
@@ -207,8 +211,7 @@ class _GNSSelectCustomerAndAddressState
   //   }
   // }
 
-  Row _row(
-      String title, String initTitle, bool isErrorActive, Function()? onTap) {
+  Row _row(String title, String initTitle, bool isErrorActive, Function()? onTap) {
     return Row(
       children: [
         Expanded(
@@ -236,8 +239,7 @@ class _GNSSelectCustomerAndAddressState
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color:
-                      title == initTitle ? Colors.blueGrey[200] : Colors.black,
+                  color: title == initTitle ? Colors.blueGrey[200] : Colors.black,
                 ),
               ),
             ),
@@ -326,44 +328,34 @@ class _GNSSelectCustomerAndAddressState
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Cariler",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: response.customers!.items!.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(
-                              response.customers!.items![index].name!,
-                              () async {
-                            customerName =
-                                response.customers!.items![index].name!;
-                            customerId =
-                                response.customers!.items![index].customerId!;
-                            customerAddressName = "Sevk Adresi";
-                            customerAddressId = "";
-                            _showLoadingScreen(true, "Yükleniyor...");
-                            customerAddressesResponse = await apiRepository
-                                .getCustomerAddresses(customerId);
-                            _showLoadingScreen(false, "Yükleniyor...");
-                            updateInfo();
-                            Navigator.pop(context);
-                            setState(() {});
-                          });
-                        },
-                      )
-                    ]),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: response.customers!.items!.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(response.customers!.items![index].name!, () async {
+                        customerName = response.customers!.items![index].name!;
+                        customerId = response.customers!.items![index].customerId!;
+                        customerAddressName = getCustomerAddressTypeText();
+                        customerAddressId = "";
+                        _showLoadingScreen(true, "Yükleniyor...");
+                        customerAddressesResponse = await apiRepository.getCustomerAddresses(customerId);
+                        _showLoadingScreen(false, "Yükleniyor...");
+                        updateInfo();
+                        Navigator.pop(context);
+                        setState(() {});
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -421,44 +413,67 @@ class _GNSSelectCustomerAndAddressState
                   topRight: Radius.circular(20.0),
                 ),
               ),
-              child: const Center(
+              child: Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Text(
-                    "Sevk Adresleri",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    getCustomerAddressTypeText(),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: response.addresses!.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(
-                              response.addresses![index].name!, () {
-                            customerAddressName =
-                                response.addresses![index].name!;
-                            customerAddressId =
-                                response.addresses![index].customerAddressId!;
-                            addressDetail =
-                                response.addresses![index].description!;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: response.addresses!.length,
+                    itemBuilder: (context, index) {
+                      if (widget.addressType == CustomerAddressType.both) {
+                        return _selectingAreaRowItem(response.addresses![index].name!, () {
+                          customerAddressName = response.addresses![index].name!;
+                          customerAddressId = response.addresses![index].customerAddressId!;
+                          addressDetail = response.addresses![index].description!;
+                          updateInfo();
+                          Navigator.pop(context);
+                          setState(() {});
+                        });
+                      }
+
+                      if (widget.addressType == CustomerAddressType.invoiceAddress) {
+                        if (response.addresses![index].isDefault!) {
+                          return _selectingAreaRowItem(response.addresses![index].name!, () {
+                            customerAddressName = response.addresses![index].name!;
+                            customerAddressId = response.addresses![index].customerAddressId!;
+                            addressDetail = response.addresses![index].description!;
                             updateInfo();
                             Navigator.pop(context);
                             setState(() {});
                           });
-                        },
-                      )
-                    ]),
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }
+
+                      if (widget.addressType == CustomerAddressType.shippingAddress) {
+                        if (!response.addresses![index].isDefault!) {
+                          return _selectingAreaRowItem(response.addresses![index].name!, () {
+                            customerAddressName = response.addresses![index].name!;
+                            customerAddressId = response.addresses![index].customerAddressId!;
+                            addressDetail = response.addresses![index].description!;
+                            updateInfo();
+                            Navigator.pop(context);
+                            setState(() {});
+                          });
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }
+                    },
+                  )
+                ]),
               ),
             ),
           ],

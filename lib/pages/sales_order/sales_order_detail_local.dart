@@ -27,13 +27,18 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
     _getLocalOrderDetailItemList();
   }
 
+  List<OrderDetailItemDB> sortOrderDetailItems(List<OrderDetailItemDB> items) {
+    // Yeni bir kopya oluşturup sıralıyoruz
+    List<OrderDetailItemDB> sortedList = List.from(items);
+    sortedList.sort((a, b) => (a.lineNr ?? 0).compareTo(b.lineNr ?? 0));
+    return sortedList;
+  }
+
   void _getLocalOrderDetailItemList() async {
     var results = await _dbHelper.getOrderDetailItemList(widget.item.orderId!);
-    isPriceVisible = await ServiceSharedPreferences.getSharedBool(
-            SharedPreferencesKey.isPriceVisible) ??
-        false;
+    isPriceVisible = await ServiceSharedPreferences.getSharedBool(SharedPreferencesKey.isPriceVisible) ?? false;
     orderDetailItemList = results;
-
+    orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
     setState(() {});
   }
 
@@ -74,9 +79,9 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
                                       orderDetailItemList: orderDetailItemList,
                                       orderId: widget.item.orderId!,
                                     ))).then((value) async {
-                          var results = await _dbHelper
-                              .getOrderDetailItemList(widget.item.orderId!);
+                          var results = await _dbHelper.getOrderDetailItemList(widget.item.orderId!);
                           orderDetailItemList = results;
+                          orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
                           setState(() {});
                         });
                       },
@@ -100,8 +105,7 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
             const SizedBox(
               height: 5,
             ),
-            _infoRow("Tarih",
-                DateFormat('dd-MM-yyyy').format(widget.item.ficheDate!)),
+            _infoRow("Tarih", DateFormat('dd-MM-yyyy').format(widget.item.ficheDate!)),
             _divider(),
             _infoRow("Müşteri", widget.item.customer.toString()),
             _divider(),
@@ -109,8 +113,7 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
             _divider(),
             _infoRow("Adet", widget.item.lineCount.toString()),
             _divider(),
-            _infoRow(
-                "Tutar", isPriceVisible ? widget.item.total.toString() : "***"),
+            _infoRow("Tutar", isPriceVisible ? widget.item.total.toString() : "***"),
             _divider(),
             _infoRow("Durum", widget.item.orderStatus.toString()),
             _divider(),
@@ -137,16 +140,12 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
                       splashColor: Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                       child: ListTile(
-                        contentPadding:
-                            const EdgeInsets.only(right: 15, left: 15),
+                        contentPadding: const EdgeInsets.only(right: 15, left: 15),
                         leading: Text(
                           (index + 1 < 10)
                               ? "0${index + 1} ${serilotType(orderDetailItemList![index].serilotType!)}"
                               : "${index + 1} ${serilotType(orderDetailItemList![index].serilotType!)}",
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[700]),
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
                         ),
                         trailing: Text(
                           "${orderDetailItemList![index].scannedQty!} / ${orderDetailItemList![index].qty}",
@@ -154,8 +153,7 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
                               fontSize: 19,
                               fontWeight: FontWeight.bold,
                               color: selectColor(
-                                  orderDetailItemList![index].scannedQty!,
-                                  orderDetailItemList![index].qty!)),
+                                  orderDetailItemList![index].scannedQty!, orderDetailItemList![index].qty!)),
                         ),
                         title: Text(
                           "${orderDetailItemList![index].productBarcode}",
@@ -167,24 +165,16 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
                             color: Color(0xff727272),
                           ),
                         ),
-                        subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "${orderDetailItemList![index].productName}",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.grey[700]),
-                              ),
-                              Text(
-                                "${orderDetailItemList![index].warehouse}",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.grey[700]),
-                              )
-                            ]),
+                        subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(
+                            "${orderDetailItemList![index].productName}",
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                          ),
+                          Text(
+                            "${orderDetailItemList![index].warehouse}",
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                          )
+                        ]),
                       ),
                     ),
                   );
@@ -192,10 +182,7 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
             const SizedBox(
               height: 15,
             ),
-            _listTileButton(
-                "Toplamaya Devam Et",
-                Icons.access_time,
-                const Color.fromARGB(255, 228, 228, 228),
+            _listTileButton("Toplamaya Devam Et", Icons.access_time, const Color.fromARGB(255, 228, 228, 228),
                 const Color(0xffff9700), () {
               Navigator.push(
                   context,
@@ -204,9 +191,10 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
                             orderDetailItemList: orderDetailItemList,
                             orderId: widget.item.orderId!,
                           ))).then((value) async {
-                var results = await _dbHelper
-                    .getOrderDetailItemList(widget.item.orderId!);
+                var results = await _dbHelper.getOrderDetailItemList(widget.item.orderId!);
                 orderDetailItemList = results;
+                orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
+
                 setState(() {});
               });
             }),
@@ -226,15 +214,11 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
 
   AppBar _appBar() {
     return AppBar(
-      iconTheme: IconThemeData(
-          color: Colors.deepOrange[700], size: 32 //change your color here
+      iconTheme: IconThemeData(color: Colors.deepOrange[700], size: 32 //change your color here
           ),
       title: Text(
         "Sipariş Detayı",
-        style: TextStyle(
-            color: Colors.deepOrange[700],
-            fontWeight: FontWeight.bold,
-            fontSize: 20),
+        style: TextStyle(color: Colors.deepOrange[700], fontWeight: FontWeight.bold, fontSize: 20),
         textAlign: TextAlign.center,
       ),
       centerTitle: true,
@@ -292,14 +276,12 @@ class _SalesOrderDetailLocalState extends State<SalesOrderDetailLocal> {
     );
   }
 
-  Padding _listTileButton(String content, IconData icon, Color textColor,
-      Color backgroundColor, VoidCallback? onTap) {
+  Padding _listTileButton(String content, IconData icon, Color textColor, Color backgroundColor, VoidCallback? onTap) {
     return Padding(
       padding: const EdgeInsets.only(top: 5),
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(
-              30), // Kenar yuvarlaklığını burada ayarlayabilirsiniz
+          borderRadius: BorderRadius.circular(30), // Kenar yuvarlaklığını burada ayarlayabilirsiniz
         ),
         color: backgroundColor,
         child: InkWell(

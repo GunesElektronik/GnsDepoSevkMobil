@@ -28,17 +28,13 @@ class _GNSSplashScreenState extends State<GNSSplashScreen> {
   void getSharedParameter() async {
     apiRepository = await ApiRepository.create(context);
     await Future.delayed(const Duration(seconds: 2));
-    employeeUsername =
-        await ServiceSharedPreferences.getSharedString("EmployeeUsername") ??
-            "";
-    employeePassword =
-        await ServiceSharedPreferences.getSharedString("EmployeePassword") ??
-            "";
+    employeeUsername = await ServiceSharedPreferences.getSharedString("EmployeeUsername") ?? "";
+    employeePassword = await ServiceSharedPreferences.getSharedString("EmployeePassword") ?? "";
     response = await apiRepository.getAuthBasedOnWorkplace();
 
     if (response == null) {
-      await _loginRepository.getLoginEmployee(
-          employeeUsername, employeePassword);
+      // await _loginRepository.getLoginEmployee(
+      //     employeeUsername, employeePassword);
       apiRepository = await ApiRepository.create(context);
 
       // await apiRepository.getSystemSettingsList();

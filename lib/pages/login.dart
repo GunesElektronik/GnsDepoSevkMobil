@@ -35,9 +35,7 @@ class _LoginState extends State<Login> {
   }
 
   void _getFirmTitle() async {
-    firmTitle = await ServiceSharedPreferences.getSharedString(
-            SharedPreferencesKey.firmTitle) ??
-        "";
+    firmTitle = await ServiceSharedPreferences.getSharedString(SharedPreferencesKey.firmTitle) ?? "";
 
     setState(() {});
   }
@@ -97,8 +95,7 @@ class _LoginState extends State<Login> {
                           const Text(
                             'Merhaba',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 30),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
                           ),
                           const SizedBox(
                             height: 5.0,
@@ -106,8 +103,7 @@ class _LoginState extends State<Login> {
                           Text(
                             _resultMessage,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w500, fontSize: 17),
+                            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
                           ),
                           const SizedBox(
                             height: 20.0,
@@ -186,8 +182,7 @@ class _LoginState extends State<Login> {
                               InkWell(
                                 onTap: () {
                                   setState(() {
-                                    rememberMe =
-                                        !rememberMe; // Checkbox'ın değerini tersine çevir
+                                    rememberMe = !rememberMe; // Checkbox'ın değerini tersine çevir
                                   });
                                 },
                                 child: const Text(
@@ -221,31 +216,21 @@ class _LoginState extends State<Login> {
                                       );
                                     });
 
-                                final formIsValid =
-                                    formKey.currentState?.validate();
+                                final formIsValid = formKey.currentState?.validate();
 
                                 print("valid : ${formIsValid}");
 
                                 if (formIsValid == true) {
-                                  var _result =
-                                      await _loginRepository.getLoginEmployee(
-                                          userName.text, password.text);
+                                  var _result = await _loginRepository.getLoginEmployee(userName.text, password.text);
                                   if (_result != null) {
                                     if (rememberMe) {
-                                      ServiceSharedPreferences.setSharedString(
-                                          "EmployeeUsername", userName.text);
-                                      ServiceSharedPreferences.setSharedString(
-                                          "EmployeePassword", password.text);
+                                      ServiceSharedPreferences.setSharedString("EmployeeUsername", userName.text);
+                                      ServiceSharedPreferences.setSharedString("EmployeePassword", password.text);
                                     }
-                                    await _loginRepository
-                                        .getUserSpecialSettings(
-                                            _result.token!, _result.userUid!);
-                                    await _loginRepository.getUserPermission(
-                                        _result.token!, _result.userUid!);
-                                    await _loginRepository
-                                        .getFirmInformation(_result.token!);
-                                    await _loginRepository
-                                        .getSystemSettingsList(_result.token!);
+                                    await _loginRepository.getUserSpecialSettings(_result.token!, _result.userUid!);
+                                    await _loginRepository.getUserPermission(_result.token!, _result.userUid!);
+                                    await _loginRepository.getFirmInformation(_result.token!);
+                                    await _loginRepository.getSystemSettingsList(_result.token!);
                                     Navigator.of(context).pop();
                                     Navigator.pushAndRemoveUntil(
                                       context,
@@ -270,8 +255,7 @@ class _LoginState extends State<Login> {
                               },
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 10.0),
-                                child: Text("Giriş Yap",
-                                    style: TextStyle(fontSize: 20)),
+                                child: Text("Giriş Yap", style: TextStyle(fontSize: 20)),
                               ),
                             ),
                           ),
@@ -294,9 +278,7 @@ class _LoginState extends State<Login> {
                         firmTitle,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                            color: Color.fromARGB(255, 192, 52, 9),
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
+                            color: Color.fromARGB(255, 192, 52, 9), fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),

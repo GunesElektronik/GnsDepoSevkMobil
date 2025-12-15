@@ -21,8 +21,7 @@ class CreateTransferFichePage extends StatefulWidget {
   const CreateTransferFichePage({super.key});
 
   @override
-  State<CreateTransferFichePage> createState() =>
-      _CreateTransferFichePageState();
+  State<CreateTransferFichePage> createState() => _CreateTransferFichePageState();
 }
 
 class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
@@ -107,9 +106,7 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
             inWarehouseId: inTransferInfo.warehouseId,
             inWarehouseName: inTransferInfo.warehouseName,
             unitId: response.products?.items?[0].unit?.unitId ?? guidEmpty,
-            unitConversionId: response.products?.items?[0].unit?.conversions?[0]
-                    .unitConversionId ??
-                guidEmpty,
+            unitConversionId: response.products?.items?[0].unit?.conversions?[0].unitConversionId ?? guidEmpty,
             qty: 1,
             productLocationRelationId: null,
             erpId: response.products?.items?[0].erpId ?? "0",
@@ -117,8 +114,8 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
             projectId: projectId,
             projectName: projectName,
           );
-          transferProductList.add(ProductDetailAndScannedNumber(
-              response: response, bodyItem: newItem, scannedNumber: 1));
+          transferProductList
+              .add(ProductDetailAndScannedNumber(response: response, bodyItem: newItem, scannedNumber: 1));
           _showLoadingScreen(false, "Barkodla İlgili Ürün Aranıyor");
           setState(() {});
         } else {
@@ -146,12 +143,9 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
                       onBarcodeChanged: (val) async {
                         bool isMatchAnyBarcode = false;
                         transferProductList.forEach((element) {
-                          if (element.response.products?.items?[0].barcode
-                                  .toString() ==
-                              val) {
+                          if (element.response.products?.items?[0].barcode.toString() == val) {
                             isMatchAnyBarcode = true;
-                            element.bodyItem.qty =
-                                (element.bodyItem.qty ?? 0) + scannedTimes;
+                            element.bodyItem.qty = (element.bodyItem.qty ?? 0) + scannedTimes;
                             setState(() {});
                           }
                         });
@@ -178,9 +172,7 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
                                 shrinkWrap: true,
                                 itemCount: transferProductList.length,
                                 itemBuilder: (context, index) {
-                                  return _card2(
-                                      transferProductList[index].bodyItem,
-                                      index);
+                                  return _card2(transferProductList[index].bodyItem, index);
                                   // return Row(
                                   //   mainAxisAlignment:
                                   //       MainAxisAlignment.spaceBetween,
@@ -243,16 +235,14 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
                     _showFormAreaButton(),
                     Expanded(
                       flex: isFormAreaVisible ? 3 : 0,
-                      child: AnimatedContainer(
+                      child: SizedBox(
                         height: isFormAreaVisible ? null : 0,
-                        duration: const Duration(milliseconds: 200),
                         child: _formArea(),
                       ),
                     ),
                     //transfer ürünü oluşturma butonu
                     Padding(
-                      padding: const EdgeInsets.only(
-                          top: 5, left: 5, right: 5, bottom: 5),
+                      padding: const EdgeInsets.only(top: 5, left: 5, right: 5, bottom: 5),
                       child: Center(
                         child: SizedBox(
                           width: double.infinity,
@@ -261,32 +251,25 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
                             elevation: 0,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(10),
-                              splashColor:
-                                  const Color.fromARGB(255, 255, 223, 187),
+                              splashColor: const Color.fromARGB(255, 255, 223, 187),
                               onTap: () async {
                                 _updateUIForEmptyAreas();
                                 if (_isThereEmptyValue()) {
-                                  _showDialogMessage(context, "HATA !",
-                                      "Boş alanları lütfen doldurunuz.");
+                                  _showDialogMessage(context, "HATA !", "Boş alanları lütfen doldurunuz.");
                                 } else {
                                   _showLoadingScreen(true, "Yükleniyor...");
                                   try {
                                     bool isTransferCreated =
-                                        await apiRepository.createTransferFiche(
-                                            await _createTransferBody());
+                                        await apiRepository.createTransferFiche(await _createTransferBody());
                                     if (isTransferCreated) {
                                       isTransferFicheCreated = true;
-                                      _showLoadingScreen(
-                                          false, "Yükleniyor...");
+                                      _showLoadingScreen(false, "Yükleniyor...");
                                       // ignore: use_build_context_synchronously
-                                      _showDialogMessage(context, "Başarılı",
-                                          "Transfer fişi oluşturuldu");
+                                      _showDialogMessage(context, "Başarılı", "Transfer fişi oluşturuldu");
                                     } else {
-                                      _showLoadingScreen(
-                                          false, "Yükleniyor...");
+                                      _showLoadingScreen(false, "Yükleniyor...");
                                       // ignore: use_build_context_synchronously
-                                      _showDialogMessage(context, "Başarısız",
-                                          "Transfer fişi oluşturulamadı !");
+                                      _showDialogMessage(context, "Başarısız", "Transfer fişi oluşturulamadı !");
                                     }
                                   } catch (e) {
                                     _showLoadingScreen(false, "Yükleniyor...");
@@ -306,10 +289,8 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
                                       child: Text(
                                         "Devir Fişi Oluştur",
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700),
+                                        style:
+                                            TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.w700),
                                       ),
                                     ),
                                   )),
@@ -340,13 +321,11 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
         padding: const EdgeInsets.all(8.0),
         child: RichText(
           text: TextSpan(
-            style: const TextStyle(
-                fontSize: 16, color: Color.fromARGB(255, 73, 88, 90)),
+            style: const TextStyle(fontSize: 16, color: Color.fromARGB(255, 73, 88, 90)),
             children: <TextSpan>[
               TextSpan(
                 text: isFormAreaVisible ? "Gizle" : "Göster",
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -364,21 +343,15 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
             SizedBox(
               height: spaceBetweenInputs,
             ),
-            // ElevatedButton(
-            //     onPressed: () {
-            //       _updateUIForEmptyAreas();
-            //       setState(() {});
-            //     },
-            //     child: Text("asdad")),
-            GNSTextField(
-              label: "Fiş No",
-              onValueChanged: (value) {
-                ficheNo = value.toString();
-              },
-            ),
-            SizedBox(
-              height: spaceBetweenInputs,
-            ),
+            // GNSTextField(
+            //   label: "Fiş No",
+            //   onValueChanged: (value) {
+            //     ficheNo = value.toString();
+            //   },
+            // ),
+            // SizedBox(
+            //   height: spaceBetweenInputs,
+            // ),
             // GNSFieldWithBottomPage(
             //   label: "Taşıyıcı",
             //   response: transporterResponse,
@@ -428,10 +401,8 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
                       onValueChanged: (value) {
                         inTransferInfo = value;
                         transferProductList.forEach((element) {
-                          element.bodyItem.inWarehouseId =
-                              inTransferInfo.warehouseId;
-                          element.bodyItem.inWarehouseName =
-                              inTransferInfo.warehouseName;
+                          element.bodyItem.inWarehouseId = inTransferInfo.warehouseId;
+                          element.bodyItem.inWarehouseName = inTransferInfo.warehouseName;
                         });
                         setState(() {});
                       },
@@ -457,16 +428,15 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
     );
   }
 
-  Future<dynamic> _showDialogForUpdateProduct(BuildContext context,
-      String content, TransferFicheLocalItems oldItem, int index) {
+  Future<dynamic> _showDialogForUpdateProduct(
+      BuildContext context, String content, TransferFicheLocalItems oldItem, int index) {
     return showDialog(
       context: context,
       builder: (context) => PopScope(
         canPop: true,
         child: AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+              borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
             ),
             title: const Text("Ürün Güncelle"),
             contentPadding: const EdgeInsets.all(10.0),
@@ -511,17 +481,11 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
             contentPadding: const EdgeInsets.only(right: 15, left: 15),
             leading: Text(
               (index + 1 < 10) ? "0${index + 1}" : "${index + 1}",
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.grey[700]),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
             ),
             trailing: Text(
               item.qty.toString(),
-              style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple),
+              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.purple),
             ),
             title: Text(
               item.description.toString(),
@@ -533,14 +497,10 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
                 color: Color(0xff727272),
               ),
             ),
-            subtitle:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
                 "Giriş Ambarı: ${item.inWarehouseName.toString()}",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.grey[700]),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
               )
             ]),
           ),
@@ -611,17 +571,11 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
             contentPadding: const EdgeInsets.only(right: 15, left: 15),
             leading: Text(
               (index + 1 < 10) ? "0${index + 1}" : "${index + 1}",
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.grey[700]),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
             ),
             trailing: Text(
               item.qty.toString(),
-              style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple),
+              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.purple),
             ),
             title: Text(
               item.description.toString(),
@@ -633,14 +587,10 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
                 color: Color(0xff727272),
               ),
             ),
-            subtitle:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
                 "Giriş Ambarı: ${item.inWarehouseName.toString()}",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.grey[700]),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
               )
             ]),
           ),
@@ -651,15 +601,11 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
 
   AppBar _appBar() {
     return AppBar(
-      iconTheme: IconThemeData(
-          color: Colors.deepOrange[700], size: 32 //change your color here
+      iconTheme: IconThemeData(color: Colors.deepOrange[700], size: 32 //change your color here
           ),
       title: Text(
         "Devir Fişi Oluştur",
-        style: TextStyle(
-            color: Colors.deepOrange[700],
-            fontWeight: FontWeight.bold,
-            fontSize: 20),
+        style: TextStyle(color: Colors.deepOrange[700], fontWeight: FontWeight.bold, fontSize: 20),
         textAlign: TextAlign.center,
       ),
       centerTitle: true,
@@ -672,16 +618,14 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
     );
   }
 
-  Future<dynamic> showDialogForAddNewProduct(
-      BuildContext context, String content) {
+  Future<dynamic> showDialogForAddNewProduct(BuildContext context, String content) {
     return showDialog(
       context: context,
       builder: (context) => PopScope(
         canPop: false,
         child: AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+              borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
             ),
             title: const Text("Ürün Ekle"),
             contentPadding: const EdgeInsets.all(10.0),
@@ -736,8 +680,7 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
       context: buildContext,
       builder: (buildContext) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -813,8 +756,7 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
   }
 
   Future<String> _getDocNumberFicheNumber() async {
-    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(
-        apiRepository.employeeUid, "7");
+    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(apiRepository.employeeUid, "7");
 
     return getFicheNumberResponse?.docnumber?.lastNum ?? "";
   }
@@ -822,8 +764,7 @@ class _CreateTransferFichePageState extends State<CreateTransferFichePage> {
   Future<TransferFicheRequestBody> _createTransferBody() async {
     return TransferFicheRequestBody(
       ficheNo: ficheNo.isEmpty ? await _getDocNumberFicheNumber() : ficheNo,
-      ficheDate:
-          DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(ficheDate.toUtc()),
+      ficheDate: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(ficheDate.toUtc()),
       ficheTime: DateFormat('HH:mm').format(ficheDate),
       docNo: "",
       inWorkplaceId: inTransferInfo.workplaceId,

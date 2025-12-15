@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:gns_warehouse/constants/customer_address_type.dart';
 import 'package:gns_warehouse/constants/system_settings.dart';
 import 'package:gns_warehouse/models/new_api/doc_number_get_fiche_number.dart';
 import 'package:gns_warehouse/models/new_api/new_customer_list_response.dart';
@@ -114,9 +115,8 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
   }
 
   Future<void> _getWaybillTypeSelection() async {
-    String waybillType = await ServiceSharedPreferences.getSharedString(
-            GNSSystemSettingsUtils.WaybillTypeSelection) ??
-        "";
+    String waybillType =
+        await ServiceSharedPreferences.getSharedString(GNSSystemSettingsUtils.WaybillTypeSelection) ?? "";
 
     switch (waybillType) {
       case "0":
@@ -162,9 +162,7 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
             tax: 20,
             nettotal: 80,
             unitId: response.products?.items?[0].unit?.unitId ?? guidEmpty,
-            unitConversionId: response.products?.items?[0].unit?.conversions?[0]
-                    .unitConversionId ??
-                guidEmpty,
+            unitConversionId: response.products?.items?[0].unit?.conversions?[0].unitConversionId ?? guidEmpty,
             erpId: response.products?.items?[0].erpId ?? "0",
             erpCode: response.products?.items?[0].erpCode ?? "0",
             currencyId: 1,
@@ -174,16 +172,11 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
 
           ProductDetailInfoForUI infoForUI = ProductDetailInfoForUI(
             warehouseName: warehouseInfo.warehouseName,
-            unitConversionName: response
-                    .products?.items?[0].unit?.conversions?[0].description ??
-                "",
+            unitConversionName: response.products?.items?[0].unit?.conversions?[0].description ?? "",
           );
           salesProductList.add(
             ProductDetailAndScannedNumberForSalesOrderCreate(
-                response: response,
-                bodyItem: newItem,
-                scannedNumber: 1,
-                infoForUI: infoForUI),
+                response: response, bodyItem: newItem, scannedNumber: 1, infoForUI: infoForUI),
           );
           _showLoadingScreen(false, "Barkodla İlgili Ürün Aranıyor");
           setState(() {});
@@ -258,21 +251,15 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
                                     } else {
                                       bool isMatchAnyBarcode = false;
                                       salesProductList.forEach((element) {
-                                        if (element.response.products?.items?[0]
-                                                .barcode
-                                                .toString() ==
-                                            val) {
+                                        if (element.response.products?.items?[0].barcode.toString() == val) {
                                           isMatchAnyBarcode = true;
-                                          element.bodyItem.qty =
-                                              (element.bodyItem.qty ?? 0) +
-                                                  scannedTimes;
+                                          element.bodyItem.qty = (element.bodyItem.qty ?? 0) + scannedTimes;
                                           setState(() {});
                                         }
                                       });
 
                                       if (isMatchAnyBarcode == false) {
-                                        await _getProductBasedOnBarcode(
-                                            val.toString());
+                                        await _getProductBasedOnBarcode(val.toString());
                                       }
                                     }
                                   },
@@ -284,20 +271,15 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
                                 Expanded(
                                   child: SingleChildScrollView(
                                     child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
                                         ListView.builder(
                                           primary: false,
                                           shrinkWrap: true,
                                           itemCount: salesProductList.length,
                                           itemBuilder: (context, index) {
-                                            return _card2(
-                                                salesProductList[index],
-                                                index,
-                                                salesProductList[index]
-                                                    .infoForUI
-                                                    .warehouseName);
+                                            return _card2(salesProductList[index], index,
+                                                salesProductList[index].infoForUI.warehouseName);
                                           },
                                         )
                                       ],
@@ -330,10 +312,10 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
                                     height: spaceBetweenInputs,
                                   ),
                                   GNSSelectCustomerAndAddress(
+                                    addressType: CustomerAddressType.both,
                                     response: customerResponse!,
                                     isErrorActiveForCustomer: isCustomerIdEmpty,
-                                    isErrorActiveForCustomerAddress:
-                                        isCustomerAddressIdEmpty,
+                                    isErrorActiveForCustomerAddress: isCustomerAddressIdEmpty,
                                     onValueChanged: (value) {
                                       customerInfo = value;
                                     },
@@ -385,8 +367,7 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
                                   GNSSelectProject(
                                     onValueChanged: (value) {
                                       projectId = value.projectId.toString();
-                                      projectName =
-                                          value.projectName.toString();
+                                      projectName = value.projectName.toString();
 
                                       salesProductList.forEach((element) {
                                         element.bodyItem.projectId = projectId;
@@ -407,21 +388,14 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
                                           child: GNSSelectWarehouseList(
                                             title: "Giriş",
                                             response: workplaceResponse!,
-                                            isErrorActiveForWorkplace:
-                                                isWorkplaceIdEmpty,
-                                            isErrorActiveForDepartment:
-                                                isDepartmentIdEmpty,
-                                            isErrorActiveForWarehouse:
-                                                isWarehouseIdEmpty,
+                                            isErrorActiveForWorkplace: isWorkplaceIdEmpty,
+                                            isErrorActiveForDepartment: isDepartmentIdEmpty,
+                                            isErrorActiveForWarehouse: isWarehouseIdEmpty,
                                             onValueChanged: (value) {
                                               warehouseInfo = value;
-                                              salesProductList
-                                                  .forEach((element) {
-                                                element.bodyItem.warehouseId =
-                                                    warehouseInfo.warehouseId;
-                                                element.infoForUI
-                                                        .warehouseName =
-                                                    warehouseInfo.warehouseName;
+                                              salesProductList.forEach((element) {
+                                                element.bodyItem.warehouseId = warehouseInfo.warehouseId;
+                                                element.infoForUI.warehouseName = warehouseInfo.warehouseName;
                                               });
                                               setState(() {});
                                             },
@@ -435,8 +409,7 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
                                   ),
                                   GNSTextFormField(
                                     label: "Not",
-                                    maxLengthEnforcement:
-                                        MaxLengthEnforcement.enforced,
+                                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
                                     maxLength: 200,
                                     onValueChanged: (value) {
                                       description = value!;
@@ -478,36 +451,23 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
               onTap: () async {
                 _updateUIForEmptyAreas();
                 if (_isThereEmptyValueForCreateOrder()) {
-                  GNSShowDialog(
-                      context,
-                      "HATA !",
-                      "Sipariş oluşturmak için alanlar dolu olmalıdır.",
-                      "Kapat",
-                      "Tamam",
+                  GNSShowDialog(context, "HATA !", "Sipariş oluşturmak için alanlar dolu olmalıdır.", "Kapat", "Tamam",
                       () => Navigator.of(context).pop());
                 } else {
                   try {
                     _showLoadingScreen(true, "İşlem Yapılıyor");
-                    var createResponse = await apiRepository
-                        .createSalesOrder(await _createSalesOrderBody());
+                    var createResponse = await apiRepository.createSalesOrder(await _createSalesOrderBody());
                     _showLoadingScreen(false, "İşlem Yapılıyor");
                     if (isWaybillAutoCreated) {
                       _showLoadingScreen(true, "İşlem Yapılıyor");
-                      response = await apiRepository
-                          .getOrderDetail(createResponse!.orderId!);
-                      var isWaybillCreated = await apiRepository
-                          .createWaybill(await _createWaybillBodyNew());
+                      response = await apiRepository.getOrderDetail(createResponse!.orderId!);
+                      var isWaybillCreated = await apiRepository.createWaybill(await _createWaybillBodyNew());
                       _showLoadingScreen(false, "İşlem Yapılıyor");
                     }
                     if (createResponse != null) {
                       // ignore: use_build_context_synchronously
-                      GNSShowDialog(
-                          context,
-                          "İşlem Başarılı",
-                          "Sipariş başarılı bir şekilde oluşturuldu",
-                          "Kapat",
-                          "Tamam",
-                          () => Navigator.of(context).pop());
+                      GNSShowDialog(context, "İşlem Başarılı", "Sipariş başarılı bir şekilde oluşturuldu", "Kapat",
+                          "Tamam", () => Navigator.of(context).pop());
                     }
                   } catch (e) {
                     _showLoadingScreen(false, "İşlem Yapılıyor");
@@ -526,10 +486,7 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
                       child: Text(
                         "Siparişi Oluştur",
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700),
+                        style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.w700),
                       ),
                     ),
                   )),
@@ -540,8 +497,7 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
     );
   }
 
-  Slidable _card2(ProductDetailAndScannedNumberForSalesOrderCreate item,
-      int index, String warehouseName) {
+  Slidable _card2(ProductDetailAndScannedNumberForSalesOrderCreate item, int index, String warehouseName) {
     return Slidable(
       endActionPane: ActionPane(motion: const StretchMotion(), children: [
         SlidableAction(
@@ -568,17 +524,11 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
             contentPadding: const EdgeInsets.only(right: 15, left: 15),
             leading: Text(
               (index + 1 < 10) ? "0${index + 1}" : "${index + 1}",
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.grey[700]),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
             ),
             trailing: Text(
               item.bodyItem.qty.toString(),
-              style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple),
+              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.purple),
             ),
             title: Text(
               item.bodyItem.description.toString(),
@@ -590,15 +540,11 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
                 color: Color(0xff727272),
               ),
             ),
-            subtitle:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
                 //${item.inWarehouseName.toString()}
                 "Giriş Ambarı: $warehouseName",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.grey[700]),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
               )
             ]),
           ),
@@ -608,18 +554,14 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
   }
 
   Future<dynamic> _showDialogForUpdateProduct(
-      BuildContext context,
-      String content,
-      ProductDetailAndScannedNumberForSalesOrderCreate oldItem,
-      int index) {
+      BuildContext context, String content, ProductDetailAndScannedNumberForSalesOrderCreate oldItem, int index) {
     return showDialog(
       context: context,
       builder: (context) => PopScope(
         canPop: true,
         child: AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+              borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
             ),
             title: const Text("Ürün Güncelle"),
             contentPadding: const EdgeInsets.all(10.0),
@@ -694,8 +636,7 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
   Future<String> _getDocNumberFicheNumber() async {
     //3 satış siparişi
     //4 satın alma siparişi
-    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(
-        apiRepository.employeeUid, "3");
+    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(apiRepository.employeeUid, "3");
 
     return getFicheNumberResponse?.docnumber?.lastNum ?? "";
   }
@@ -813,15 +754,11 @@ class _CreateSalesOrderState extends State<CreateSalesOrder> {
       totalvat: response.order?.totalvat,
       grossTotal: response.order?.grossTotal,
       transporterId: transporterId,
-      shippingAccountId:
-          response.order?.shippingAccount?.customerId ?? guidEmpty,
-      shippingAddressId:
-          response.order?.shippingAddress?.shippingAddressId ?? guidEmpty,
+      shippingAccountId: response.order?.shippingAccount?.customerId ?? guidEmpty,
+      shippingAddressId: response.order?.shippingAddress?.shippingAddressId ?? guidEmpty,
       description: "",
-      shippingTypeId:
-          response.order?.orderShippingType?.shippingTypeId ?? guidEmpty,
-      salesmanId:
-          response.order?.shippingAccount?.salesman?.salesmanId ?? guidEmpty,
+      shippingTypeId: response.order?.orderShippingType?.shippingTypeId ?? guidEmpty,
+      salesmanId: response.order?.shippingAccount?.salesman?.salesmanId ?? guidEmpty,
       waybillStatusId: 1,
       erpId: "",
       erpCode: "",

@@ -29,11 +29,7 @@ import 'package:gns_warehouse/widgets/gns_text_field.dart';
 import 'package:intl/intl.dart';
 
 class SalesOrderDetail extends StatefulWidget {
-  const SalesOrderDetail(
-      {super.key,
-      required this.orderId,
-      required this.item,
-      required this.onValueChanged});
+  const SalesOrderDetail({super.key, required this.orderId, required this.item, required this.onValueChanged});
 
   final String orderId;
   final OrderSummaryItem item;
@@ -93,8 +89,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
   String waybillTypeName = "";
   bool isWaybillTypeSelectable = false;
   int waybillTypeId = 0;
-  List<WaybillTypeItem> waybillTypeItem =
-      GNSSystemSettingsUtils.waybillTypeItemList;
+  List<WaybillTypeItem> waybillTypeItem = GNSSystemSettingsUtils.waybillTypeItemList;
 
   int orderStatusId = -1;
   String orderStatusName = "";
@@ -110,6 +105,13 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+  }
+
+  List<OrderDetailItemDB> sortOrderDetailItems(List<OrderDetailItemDB> items) {
+    // Yeni bir kopya oluşturup sıralıyoruz
+    List<OrderDetailItemDB> sortedList = List.from(items);
+    sortedList.sort((a, b) => (a.lineNr ?? 0).compareTo(b.lineNr ?? 0));
+    return sortedList;
   }
 
   int _transformToIntForProductTracking(String trackingMethod) {
@@ -129,22 +131,16 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     isThisInMultiOrder = false;
     apiRepository = await ApiRepository.create(context);
     try {
-      isAuthSalesCancelAssign = await ServiceSharedPreferences.getSharedBool(
-              UserSpecialSettingsUtils.isAuthSalesCancelAssign) ??
-          false;
-      isAuthChangeOrderStatus = await ServiceSharedPreferences.getSharedBool(
-              UserSpecialSettingsUtils.isAuthSalesChangeOrderStatus) ??
-          false;
-      isPriceVisible = await ServiceSharedPreferences.getSharedBool(
-              SharedPreferencesKey.isPriceVisible) ??
-          false;
-      isOrderAssignAutoDrop = await ServiceSharedPreferences.getSharedBool(
-              GNSSystemSettingsUtils.OrderAssignAutoDrop) ??
-          false;
+      isAuthSalesCancelAssign =
+          await ServiceSharedPreferences.getSharedBool(UserSpecialSettingsUtils.isAuthSalesCancelAssign) ?? false;
+      isAuthChangeOrderStatus =
+          await ServiceSharedPreferences.getSharedBool(UserSpecialSettingsUtils.isAuthSalesChangeOrderStatus) ?? false;
+      isPriceVisible = await ServiceSharedPreferences.getSharedBool(SharedPreferencesKey.isPriceVisible) ?? false;
+      isOrderAssignAutoDrop =
+          await ServiceSharedPreferences.getSharedBool(GNSSystemSettingsUtils.OrderAssignAutoDrop) ?? false;
     } catch (e) {}
     await _getWaybillTypeSelection();
-    isThisInMultiOrder = await _dbHelper
-        .isThereAnyItemBasedOrderIdInMultiSalesOrder(widget.orderId);
+    isThisInMultiOrder = await _dbHelper.isThereAnyItemBasedOrderIdInMultiSalesOrder(widget.orderId);
     //burası
     _getUserSpecialWarehouseSettings();
     try {
@@ -174,11 +170,11 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
           productBarcode: element.product!.barcode,
           warehouse: element.warehouseName,
           isExceededStockCount: false,
-          serilotType: _transformToIntForProductTracking(
-              element.product!.productTrackingMethod!),
+          serilotType: _transformToIntForProductTracking(element.product!.productTrackingMethod!),
           scannedQty: element.shippedQty!.toInt()!,
           shippedQty: 0,
           qty: element.qty!.toInt(),
+          lineNr: element.lineNr!.toInt(),
         ),
       );
     });
@@ -196,6 +192,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     } else {
       isAssingedPersonIsCurrenUser = false;
     }
+
     setState(() {
       isDataFetch = true;
       if (response.order != null) {
@@ -204,12 +201,13 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       }
     });
     //print("response: ${response.data!.isAssing}");
+
+    orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
   }
 
   Future<void> _getWaybillTypeSelection() async {
-    String waybillType = await ServiceSharedPreferences.getSharedString(
-            GNSSystemSettingsUtils.WaybillTypeSelection) ??
-        "";
+    String waybillType =
+        await ServiceSharedPreferences.getSharedString(GNSSystemSettingsUtils.WaybillTypeSelection) ?? "";
 
     switch (waybillType) {
       case "0":
@@ -241,24 +239,20 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     riskLimitResponse = await apiRepository.getCustomerRiskLimit(customerId);
 
     if (riskLimitResponse.customerRiskLimit != null) {
-      if (response.order!.grossTotal! >
-          riskLimitResponse.customerRiskLimit!.canUseRiskLimit!) {
+      if (response.order!.grossTotal! > riskLimitResponse.customerRiskLimit!.canUseRiskLimit!) {
         isCustomerInRiskLimit = true;
-        differenceWithRiskLimit = response.order!.grossTotal! -
-            riskLimitResponse.customerRiskLimit!.canUseRiskLimit!;
+        differenceWithRiskLimit = response.order!.grossTotal! - riskLimitResponse.customerRiskLimit!.canUseRiskLimit!;
       }
     }
   }
 
 //burası
   Future<void> _getUserSpecialWarehouseSettings() async {
-    String userSpecialSetting = await ServiceSharedPreferences.getSharedString(
-            UserSpecialSettingsUtils.userWarehouseAuthOut) ??
-        "";
+    String userSpecialSetting =
+        await ServiceSharedPreferences.getSharedString(UserSpecialSettingsUtils.userWarehouseAuthOut) ?? "";
 
-    userDefaultWarehouseOut = await ServiceSharedPreferences.getSharedString(
-            UserSpecialSettingsUtils.userDefaultWarehouseOut) ??
-        "";
+    userDefaultWarehouseOut =
+        await ServiceSharedPreferences.getSharedString(UserSpecialSettingsUtils.userDefaultWarehouseOut) ?? "";
 
     print(userDefaultWarehouseOut);
 
@@ -277,17 +271,13 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     result.products!.unit!.conversions!.forEach((element) async {
       element.barcodes!.forEach((barcode) async {
         await _dbHelper.addProductBarcode(_createProductBarcodeItem(
-            productId,
-            barcode.barcode!,
-            element.code!,
-            element.convParam1!,
-            element.convParam2!));
+            productId, barcode.barcode!, element.code!, element.convParam1!, element.convParam2!));
       });
     });
   }
 
-  ProductBarcodesItemLocal _createProductBarcodeItem(String productId,
-      String barcode, String code, int convParam1, int convParam2) {
+  ProductBarcodesItemLocal _createProductBarcodeItem(
+      String productId, String barcode, String code, int convParam1, int convParam2) {
     return ProductBarcodesItemLocal(
       recid: 0,
       orderId: widget.orderId,
@@ -338,6 +328,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     await _checkStockForEachRow();
     await _createWarehouseListForItemsBasedOnStock();
     commonWarehousesForProducts = await _filterWarehouseListForAllProduct();
+    orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
     setState(() {});
   }
 
@@ -354,12 +345,13 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       orderDetailItemList = results;
       setState(() {});
     }
+
+    orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
   }
 
   bool _checkForWaybillItemsNotEmpty() {
     for (int i = 0; i < orderDetailItemList!.length; i++) {
-      if (orderDetailItemList![i].scannedQty! >
-          orderDetailItemList![i].shippedQty!) {
+      if (orderDetailItemList![i].scannedQty! > orderDetailItemList![i].shippedQty!) {
         return true;
       }
     }
@@ -373,14 +365,10 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       var remoteElement = response.order!.orderItems![i];
       for (int j = 0; j < orderDetailItemList!.length; j++) {
         var localElement = orderDetailItemList![j];
-        if (localElement.qty! != remoteElement.qty!.toInt() &&
-            localElement.orderItemId == remoteElement.orderItemId) {
+        if (localElement.qty! != remoteElement.qty!.toInt() && localElement.orderItemId == remoteElement.orderItemId) {
           isThereAnyChange = true;
           await _dbHelper.updateOrderDetailItemQty(
-              widget.orderId,
-              localElement.orderItemId!,
-              localElement.warehouseId!,
-              remoteElement.qty!.toInt());
+              widget.orderId, localElement.orderItemId!, localElement.warehouseId!, remoteElement.qty!.toInt());
         }
       }
     }
@@ -389,10 +377,8 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
   }
 
   Future<bool> _checkForRowItemsAddOrDeleteFromLogo() async {
-    List<OrderItems> addedItems =
-        findAddedItems(orderDetailItemList!, response.order!.orderItems!);
-    List<OrderDetailItemDB> deletedItems =
-        findDeletedItems(orderDetailItemList!, response.order!.orderItems!);
+    List<OrderItems> addedItems = findAddedItems(orderDetailItemList!, response.order!.orderItems!);
+    List<OrderDetailItemDB> deletedItems = findDeletedItems(orderDetailItemList!, response.order!.orderItems!);
 
     for (OrderItems item in addedItems) {
       await _dbHelper.addOrderDetailItem(OrderDetailItemDB(
@@ -408,17 +394,16 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
         isProductLocatin: item.product!.isProductLocatin ?? false,
         isExceededStockCount: false,
         stockLocationName: "",
-        serilotType: _transformToIntForProductTracking(
-            item.product!.productTrackingMethod!),
+        serilotType: _transformToIntForProductTracking(item.product!.productTrackingMethod!),
         scannedQty: item.shippedQty!.toInt(),
         qty: item.qty!.toInt(),
         shippedQty: item.shippedQty!.toInt(),
+        lineNr: item.lineNr!.toInt(),
       ));
     }
 
     for (OrderDetailItemDB item in deletedItems) {
-      await _dbHelper.deleteOrderDetailItem(
-          item.orderId!, item.orderItemId!, item.warehouseId!);
+      await _dbHelper.deleteOrderDetailItem(item.orderId!, item.orderItemId!, item.warehouseId!);
     }
 
     if (addedItems.length > 0 || deletedItems.length > 0) {
@@ -437,8 +422,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     // }
   }
 
-  List<OrderDetailItemDB> findDeletedItems(
-      List<OrderDetailItemDB> oldList, List<OrderItems> newList) {
+  List<OrderDetailItemDB> findDeletedItems(List<OrderDetailItemDB> oldList, List<OrderItems> newList) {
     List<OrderDetailItemDB> deletedItems = [];
     for (OrderDetailItemDB item in oldList) {
       if (!newList.any((newItem) => newItem.orderItemId == item.orderItemId)) {
@@ -448,8 +432,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     return deletedItems;
   }
 
-  List<OrderItems> findAddedItems(
-      List<OrderDetailItemDB> oldList, List<OrderItems> newList) {
+  List<OrderItems> findAddedItems(List<OrderDetailItemDB> oldList, List<OrderItems> newList) {
     List<OrderItems> addedItems = [];
     for (OrderItems item in newList) {
       if (!oldList.any((oldItem) => oldItem.orderItemId == item.orderItemId)) {
@@ -461,8 +444,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
 
   Future<void> _saveProductAndOrderItems() async {
     for (int i = 0; i < response.order!.orderItems!.length; i++) {
-      await _getProductBarcodes(
-          response.order!.orderItems![i].product!.productId!);
+      await _getProductBarcodes(response.order!.orderItems![i].product!.productId!);
       await _dbHelper.addOrderDetailItem(OrderDetailItemDB(
         orderId: widget.orderId,
         orderItemId: response.order!.orderItems![i].orderItemId,
@@ -473,15 +455,14 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
         productName: response.order!.orderItems![i].product!.definition ?? "",
         productBarcode: response.order!.orderItems![i].product!.barcode,
         warehouse: response.order!.orderItems![i].warehouseName,
-        isProductLocatin:
-            response.order!.orderItems![i].product!.isProductLocatin ?? false,
+        isProductLocatin: response.order!.orderItems![i].product!.isProductLocatin ?? false,
         isExceededStockCount: false,
         stockLocationName: "",
-        serilotType: _transformToIntForProductTracking(
-            response.order!.orderItems![i].product!.productTrackingMethod!),
+        serilotType: _transformToIntForProductTracking(response.order!.orderItems![i].product!.productTrackingMethod!),
         scannedQty: response.order!.orderItems![i].shippedQty!.toInt(),
         qty: response.order!.orderItems![i].qty!.toInt(),
         shippedQty: response.order!.orderItems![i].shippedQty!.toInt(),
+        lineNr: response.order!.orderItems![i].lineNr!.toInt(),
       ));
     }
     // response.order!.orderItems!.forEach((element) async {
@@ -522,8 +503,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       // bool isUpdate = false;
       bool isSuccess = false;
       _showLoadingScreen(true, "Yükleniyor ...");
-      var orderItemList =
-          await _dbHelper.getOrderDetailItemList(widget.orderId);
+      var orderItemList = await _dbHelper.getOrderDetailItemList(widget.orderId);
 
       //print("productId: ${orderItemList![0].productId}");
 
@@ -553,8 +533,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
 //         _showLoadingScreen(false, "Yükleniyor ...");
 //       }
 
-      isSuccess = await apiRepository.setOrderAssingStatus(
-          false, apiRepository.employeeUid, widget.orderId);
+      isSuccess = await apiRepository.setOrderAssingStatus(false, apiRepository.employeeUid, widget.orderId);
       _showLoadingScreen(false, "Yükleniyor ...");
       // && isUpdate yorum aldım
       if (isSuccess) {
@@ -580,17 +559,14 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
         //error ver
       }
     } else {
-      _showDialogMessage(
-          "YETERSİZ STOK", "Stok sayıları okutulan ürünleri karşılamıyor.");
+      _showDialogMessage("YETERSİZ STOK", "Stok sayıları okutulan ürünleri karşılamıyor.");
       return false;
     }
   }
 
-  Future<List<WorkplaceWarehouse>>
-      _createWarehouseListForItemsBasedOnStock() async {
+  Future<List<WorkplaceWarehouse>> _createWarehouseListForItemsBasedOnStock() async {
     List<WorkplaceWarehouse> list = [];
-    stockResponse = await apiRepository
-        .getStockByProductIdList(_createStockByProductList());
+    stockResponse = await apiRepository.getStockByProductIdList(_createStockByProductList());
 
     if (stockResponse != null) {
       for (int i = 0; i < (stockResponse!.stocks?.length ?? 0); i++) {
@@ -609,8 +585,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     return list;
   }
 
-  List<WorkplaceWarehouseOnHandStock> _filterWarehouseListForPorduct(
-      String productId) {
+  List<WorkplaceWarehouseOnHandStock> _filterWarehouseListForPorduct(String productId) {
     List<WorkplaceWarehouseOnHandStock> list = [];
 
     if (stockResponse != null) {
@@ -688,8 +663,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
 
   Future<List<StockInfoBasedOnProduct>> _checkStock() async {
     List<StockInfoBasedOnProduct> insufficientStockProducts = [];
-    var result = await apiRepository
-        .getStockByProductIdList(_createStockByProductList());
+    var result = await apiRepository.getStockByProductIdList(_createStockByProductList());
     //stockResponse'u bir kere en başta çektik, tekrar butona basarsa stockResponse değerini günceller
     // bu da her bir item'ın ambarını değiştirirken güncel gözükmesini sağlar
     stockResponse = result;
@@ -724,24 +698,20 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
 
         if (remoteElement.productId == localElement.productId &&
             remoteElement.warehouse!.warehouseId == localElement.warehouseId) {
-          if (remoteElement.onHandStock! <
-              localElement.scannedQty! - localElement.shippedQty!) {
+          if (remoteElement.onHandStock! < localElement.scannedQty! - localElement.shippedQty!) {
             var item = StockInfoBasedOnProduct(
               productName: localElement.productName!,
               barcode: localElement.productBarcode!,
               onHandStock: remoteElement.onHandStock!.toInt(),
               scannedQty: localElement.scannedQty! - localElement.shippedQty!,
               differenceBetween:
-                  (localElement.scannedQty! - localElement.shippedQty!) -
-                      remoteElement.onHandStock!.toInt(),
+                  (localElement.scannedQty! - localElement.shippedQty!) - remoteElement.onHandStock!.toInt(),
             );
-            await _dbHelper.updateOrderDetailItemExceededStockCount(
-                widget.orderId, localElement.orderItemId!, true);
+            await _dbHelper.updateOrderDetailItemExceededStockCount(widget.orderId, localElement.orderItemId!, true);
             insufficientStockProducts.add(item);
           } else {
             if (localElement.isExceededStockCount!) {
-              await _dbHelper.updateOrderDetailItemExceededStockCount(
-                  widget.orderId, localElement.orderItemId!, false);
+              await _dbHelper.updateOrderDetailItemExceededStockCount(widget.orderId, localElement.orderItemId!, false);
             }
           }
         }
@@ -774,12 +744,10 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     try {
       await apiRepository.setSalesOrderStatus(widget.orderId, orderStatusId);
       _showLoadingScreen(false, "Yükleniyor");
-      await _dbHelper.updateOrderStatusForOrderHeader(
-          orderStatusName, widget.orderId);
+      await _dbHelper.updateOrderStatusForOrderHeader(orderStatusName, widget.orderId);
     } catch (e) {
       _showLoadingScreen(false, "Yükleniyor");
-      _showDialogMessage("HATA !",
-          "Sipariş durumu değiştilirken hata oluştu. \n ${e.toString()}");
+      _showDialogMessage("HATA !", "Sipariş durumu değiştilirken hata oluştu. \n ${e.toString()}");
     }
   }
 
@@ -800,8 +768,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
               ))
           .toList();
       try {
-        isUpdate = await apiRepository.updateOrderItems(
-            widget.orderId, customerId, orderItemsList);
+        isUpdate = await apiRepository.updateOrderItems(widget.orderId, customerId, orderItemsList);
       } catch (e) {
         print("İşlem hatası: $e");
         return false;
@@ -810,8 +777,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
 
     if (isOrderAssignAutoDrop) {
       if (isUpdate) {
-        isSuccess = await apiRepository.setOrderAssingStatus(
-            false, apiRepository.employeeUid, widget.orderId);
+        isSuccess = await apiRepository.setOrderAssingStatus(false, apiRepository.employeeUid, widget.orderId);
       }
     }
 
@@ -847,6 +813,8 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       await _dbHelper.removeOrderDetailScannedItems(response.order!.ficheNo!);
       var results = await _dbHelper.getOrderDetailItemList(widget.orderId);
       orderDetailItemList = results;
+      orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
+
       setState(() {});
 
       return false;
@@ -874,8 +842,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
               ))
           .toList();
       try {
-        isUpdate = await apiRepository.updateOrderItems(
-            widget.orderId, customerId, orderItemsList);
+        isUpdate = await apiRepository.updateOrderItems(widget.orderId, customerId, orderItemsList);
       } catch (e) {
         print("İşlem hatası: $e");
         return false;
@@ -884,14 +851,9 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
 
     if (isUpdate) {
       // ignore: use_build_context_synchronously
-      await GNSShowDialog(
-          context,
-          "Emin Misiniz ?",
-          "Siparişi üzerinizden bırakmak ister misiniz ?",
-          "Hayır",
-          "Evet", () async {
-        isSuccess = await apiRepository.setOrderAssingStatus(
-            false, apiRepository.employeeUid, widget.orderId);
+      await GNSShowDialog(context, "Emin Misiniz ?", "Siparişi üzerinizden bırakmak ister misiniz ?", "Hayır", "Evet",
+          () async {
+        isSuccess = await apiRepository.setOrderAssingStatus(false, apiRepository.employeeUid, widget.orderId);
 
         if (isSuccess) {
           _clearFromLocal();
@@ -920,8 +882,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
   _takeTheOrder() async {
     _showLoadingScreen(true, "Yükleniyor ...");
     //await Future.delayed(Duration(seconds: 3));
-    bool isSuccess = await apiRepository.setOrderAssingStatus(
-        true, apiRepository.employeeUid, widget.orderId);
+    bool isSuccess = await apiRepository.setOrderAssingStatus(true, apiRepository.employeeUid, widget.orderId);
     _showLoadingScreen(false, "Yükleniyor ...");
     //bool deneme = false;
     if (isSuccess) {
@@ -955,6 +916,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       // });
       var results = await _dbHelper.getOrderDetailItemList(widget.orderId);
       orderDetailItemList = results;
+      orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
       _checkStockForEachRow();
 
       _showLoadingScreen(false, "Veriler Güncelleniyor ...");
@@ -976,8 +938,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -1121,8 +1082,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -1160,14 +1120,12 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     }
   }
 
-  Future<dynamic> showDialogForAssingOrder(
-      BuildContext context, bool isAssing, String content) {
+  Future<dynamic> showDialogForAssingOrder(BuildContext context, bool isAssing, String content) {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -1230,9 +1188,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                     child: Text(
                       "BU SİPARİŞ ÇOKLU SİPARİŞLERDE",
                       style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(255, 255, 152, 35)),
+                          fontSize: 16, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 255, 152, 35)),
                     ),
                   )
                 : const SizedBox(),
@@ -1250,8 +1206,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                         ? const SizedBox()
                         : IconButton(
                             onPressed: () {
-                              showDialogForAssingOrder(context, true,
-                                  "Siparişi görevlenmeye emin misiniz ?");
+                              showDialogForAssingOrder(context, true, "Siparişi görevlenmeye emin misiniz ?");
                             },
                             icon: const Icon(
                               Icons.download_rounded,
@@ -1259,32 +1214,27 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                               color: Color(0xffff9700),
                             ),
                           ),
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? const SizedBox(
                             width: 5,
                           )
                         : const SizedBox(),
                     //toplamaya devam et
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? IconButton(
                             onPressed: () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => OrderScan(
-                                            orderDetailItemList:
-                                                orderDetailItemList,
+                                            orderDetailItemList: orderDetailItemList,
                                             orderId: widget.orderId,
                                             // customerId:
                                             //     response.order!.customer!.customerId!,
                                           ))).then((value) async {
-                                var results = await _dbHelper
-                                    .getOrderDetailItemList(widget.orderId);
+                                var results = await _dbHelper.getOrderDetailItemList(widget.orderId);
                                 orderDetailItemList = results;
+                                orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
                                 setState(() {});
                               });
                             },
@@ -1295,18 +1245,13 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                             ),
                           )
                         : const SizedBox(),
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? const SizedBox(
                             width: 5,
                           )
                         : const SizedBox(),
                     //toplamayı tamamla
-                    isAuthSalesCancelAssign &&
-                            isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAuthSalesCancelAssign && isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? IconButton(
                             onPressed: () {
                               _complateOrder();
@@ -1318,45 +1263,31 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                             ),
                           )
                         : const SizedBox(),
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? const SizedBox(
                             width: 5,
                           )
                         : const SizedBox(),
                     //sevk et
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? IconButton(
                             onPressed: () async {
-                              _showLoadingScreen(
-                                  true, "İrsaliye Oluşturuluyor");
+                              _showLoadingScreen(true, "İrsaliye Oluşturuluyor");
                               if (isCustomerInRiskLimit) {
-                                _showLoadingScreen(
-                                    false, "İrsaliye Oluşturuluyor");
-                                _showDialogMessage(
-                                    "Müşteri Risk Limitine Takıldı",
+                                _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
+                                _showDialogMessage("Müşteri Risk Limitine Takıldı",
                                     "İrsaliye oluşturulmadı, sipariş ücreti risk limitinin arasındaki fark: \n $differenceWithRiskLimit");
                               } else {
                                 // await _changeWarehouseBasedOnItems();
-                                bool isWaybillItemNotEmpty =
-                                    _checkForWaybillItemsNotEmpty();
+                                bool isWaybillItemNotEmpty = _checkForWaybillItemsNotEmpty();
                                 if (isWaybillItemNotEmpty) {
-                                  waybillRequestBody =
-                                      await _createWaybillBodyNew();
+                                  waybillRequestBody = await _createWaybillBodyNew();
                                   try {
-                                    bool isDone = await apiRepository
-                                        .createWaybill(waybillRequestBody!);
-                                    bool isAllItemCollected =
-                                        _checkAllItemsCollectedCompletely();
+                                    bool isDone = await apiRepository.createWaybill(waybillRequestBody!);
+                                    bool isAllItemCollected = _checkAllItemsCollectedCompletely();
                                     if (isAllItemCollected) {
-                                      orderStatusId =
-                                          EntityConstants.OrderStatusKapandi;
-                                      orderStatusName =
-                                          EntityConstants.getStatusDescription(
-                                              orderStatusId);
+                                      orderStatusId = EntityConstants.OrderStatusKapandi;
+                                      orderStatusName = EntityConstants.getStatusDescription(orderStatusId);
                                       await _changeOrderStatusRequest();
                                     }
                                     if (isDone) {
@@ -1369,27 +1300,21 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                                       //   _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                                       //   _showErrorMessage(e.toString());
                                       // }
-                                      bool isCreated =
-                                          await _completeTheOrder2();
+                                      bool isCreated = await _completeTheOrder2();
                                       if (isCreated) {
                                         _deleteOrderSummaryOnLocal();
-                                        _showLoadingScreen(
-                                            false, "İrsaliye Oluşturuluyor");
-                                        _showDialogMessage(
-                                            "Başarılı", "İşlem Başarılı.");
+                                        _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
+                                        _showDialogMessage("Başarılı", "İşlem Başarılı.");
                                       } else {
-                                        _showLoadingScreen(
-                                            false, "İrsaliye Oluşturuluyor");
-                                        _showErrorMessage(
-                                            "İrsaliye oluşturuldu, Sipariş bırakılamadı !");
+                                        _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
+                                        _showErrorMessage("İrsaliye oluşturuldu, Sipariş bırakılamadı !");
                                       }
                                     } else {
                                       // _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                                       // _showErrorMessage("İrsaliye Oluşturulamadı !");
                                     }
                                   } catch (e) {
-                                    _showLoadingScreen(
-                                        false, "İrsaliye Oluşturuluyor");
+                                    _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                                     GNSShowErrorMessage(context, e.toString());
                                   }
                                   // } else {
@@ -1398,8 +1323,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                                   //       "Stok sayıları okutulan ürünleri karşılamıyor.");
                                   // }
                                 } else {
-                                  _showLoadingScreen(
-                                      false, "İrsaliye Oluşturuluyor");
+                                  _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                                   _showDialogMessage("İrsaliye Oluşturulamadı",
                                       "Okutulmuş ürün tespit edilemediği için irsaliye oluşturulamadı.");
                                 }
@@ -1427,13 +1351,10 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
               height: 5,
             ),
 
-            _infoRow("Parçalı Sipariş",
-                response.order!.isPartialOrder! ? "Evet" : "Hayır"),
+            _infoRow("Parçalı Sipariş", response.order!.isPartialOrder! ? "Evet" : "Hayır"),
             _divider(),
-            _infoRow(
-                "Tarih",
-                DateFormat('dd-MM-yyyy / HH:mm').format(
-                    DateTime.parse(response.order!.ficheDate ?? "01-01-2000"))),
+            _infoRow("Tarih",
+                DateFormat('dd-MM-yyyy / HH:mm').format(DateTime.parse(response.order!.ficheDate ?? "01-01-2000"))),
             _divider(),
             _infoRow("Müşteri", response.order!.customer!.name ?? ""),
             _divider(),
@@ -1443,13 +1364,11 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
             _divider(),
             _infoRow("Adet", response.order!.orderItems!.length.toString()),
             _divider(),
-            _infoRow("Tutar",
-                isPriceVisible ? response.order!.grossTotal.toString() : "***"),
+            _infoRow("Tutar", isPriceVisible ? response.order!.grossTotal.toString() : "***"),
             _divider(),
             _infoRow("Durum", response.order!.orderStatusName ?? ""),
             _divider(),
-            _infoRow("Operatör",
-                isAssing ? response.order!.assingmetFullname.toString() : ""),
+            _infoRow("Operatör", isAssing ? response.order!.assingmetFullname.toString() : ""),
             _divider(),
             //burası
             isAssing && isAssingedPersonIsCurrenUser
@@ -1469,10 +1388,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                           const SizedBox(
                             width: 10,
                           ),
-                          Expanded(
-                              flex: 1,
-                              child: _selectWaybillType(waybillTypeName,
-                                  selectWaybillTypeFromBottom)),
+                          Expanded(flex: 1, child: _selectWaybillType(waybillTypeName, selectWaybillTypeFromBottom)),
                         ],
                       ),
                       _divider(),
@@ -1481,9 +1397,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                           //ambar
                           Expanded(
                             child: _openBottomSheetAndSelectFromTile(
-                                warehouseInitName,
-                                warehouseName,
-                                selectWarehouseReverseForAllItems),
+                                warehouseInitName, warehouseName, selectWarehouseReverseForAllItems),
                           ),
                           const SizedBox(
                             width: 10,
@@ -1491,8 +1405,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                           //order status
                           Expanded(
                             child: isAuthChangeOrderStatus
-                                ? _selectOrderStatusFromList("OrderStatus",
-                                    orderStatusName, showOrderStatusBottomSheet)
+                                ? _selectOrderStatusFromList("OrderStatus", orderStatusName, showOrderStatusBottomSheet)
                                 : const SizedBox(),
                           ),
                         ],
@@ -1529,8 +1442,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                       //burası
                       onLongPress: () {
                         selectWarehouseReverseForOnlyOneItem(
-                            orderDetailItemList![index].orderItemId!,
-                            orderDetailItemList![index].productId!);
+                            orderDetailItemList![index].orderItemId!, orderDetailItemList![index].productId!);
                       },
                       //burası
                       highlightColor: const Color.fromARGB(255, 179, 199, 211),
@@ -1545,83 +1457,35 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                           (index + 1 < 10)
                               ? "0${index + 1} ${serilotType(orderDetailItemList![index].serilotType!)}"
                               : "${index + 1} ${serilotType(orderDetailItemList![index].serilotType!)}",
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[700]),
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
                         ),
-                        // trailing: SingleChildScrollView(
-                        //   child: Column(
-                        //     children: [
-                        //       Text(
-                        //         "${orderDetailItemList![index].scannedQty! - orderDetailItemList![index].shippedQty!}",
-                        //         style: const TextStyle(
-                        //             fontSize: 20,
-                        //             fontWeight: FontWeight.bold,
-                        //             color: Color.fromARGB(255, 39, 150, 43)),
-                        //       ),
-                        //       Text(
-                        //         "${orderDetailItemList![index].scannedQty!} / ${orderDetailItemList![index].qty}",
-                        //         style: TextStyle(
-                        //             fontSize: 10,
-                        //             fontWeight: FontWeight.bold,
-                        //             color: selectColor(
-                        //                 orderDetailItemList![index].scannedQty!,
-                        //                 orderDetailItemList![index].qty!)),
-                        //       ),
-                        //       Text(
-                        //         "${orderDetailItemList![index].qty! - orderDetailItemList![index].scannedQty!}",
-                        //         style: const TextStyle(
-                        //             fontSize: 15,
-                        //             fontWeight: FontWeight.bold,
-                        //             color: Colors.redAccent),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
-                        // title: Text(
-                        //   "${orderDetailItemList![index].productBarcode}",
-                        //   maxLines: 1,
-                        //   overflow: TextOverflow.ellipsis,
-                        //   style: const TextStyle(
-                        //     fontSize: 15,
-                        //     fontWeight: FontWeight.w700,
-                        //     color: Color(0xff727272),
-                        //   ),
-                        // ),
                         subtitle: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${orderDetailItemList![index].productBarcode}",
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff727272),
-                                      ),
-                                    ),
-                                    Text(
-                                      "${orderDetailItemList![index].productName}",
-                                      maxLines: 1,
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.grey[700]),
-                                    ),
-                                    Text(
-                                      "${orderDetailItemList![index].warehouse}",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.grey[700]),
-                                    ),
-                                  ]),
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text(
+                                  "${orderDetailItemList![index].productBarcode}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xff727272),
+                                  ),
+                                ),
+                                Text(
+                                  "${orderDetailItemList![index].productName}",
+                                  maxLines: 1,
+                                  style:
+                                      TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                                ),
+                                Text(
+                                  "${orderDetailItemList![index].warehouse}",
+                                  style:
+                                      TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                                ),
+                              ]),
                             ),
                             Column(
                               children: [
@@ -1631,8 +1495,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                                         style: const TextStyle(
                                             fontSize: 22,
                                             fontWeight: FontWeight.bold,
-                                            color: Color.fromARGB(
-                                                255, 39, 150, 43)),
+                                            color: Color.fromARGB(255, 39, 150, 43)),
                                       )
                                     : const SizedBox(),
                                 Text(
@@ -1668,16 +1531,11 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
             ),
             isAssing
                 ? const SizedBox()
-                : _listTileButton("Toplamaya Başla", Icons.download_rounded,
-                    Colors.white, const Color(0xffff9700), () {
-                    showDialogForAssingOrder(
-                        context, true, "Siparişi görevlenmeye emin misiniz ?");
+                : _listTileButton("Toplamaya Başla", Icons.download_rounded, Colors.white, const Color(0xffff9700), () {
+                    showDialogForAssingOrder(context, true, "Siparişi görevlenmeye emin misiniz ?");
                   }),
             isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
-                ? _listTileButton(
-                    "Toplamaya Devam Et",
-                    Icons.access_time,
-                    const Color.fromARGB(255, 228, 228, 228),
+                ? _listTileButton("Toplamaya Devam Et", Icons.access_time, const Color.fromARGB(255, 228, 228, 228),
                     const Color(0xffff9700), () {
                     Navigator.push(
                         context,
@@ -1688,25 +1546,20 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                                   // customerId:
                                   //     response.order!.customer!.customerId!,
                                 ))).then((value) async {
-                      var results = await _dbHelper
-                          .getOrderDetailItemList(widget.orderId);
+                      var results = await _dbHelper.getOrderDetailItemList(widget.orderId);
                       orderDetailItemList = results;
+                      orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
                       setState(() {});
                     });
                   })
                 : const SizedBox(),
-            isAuthSalesCancelAssign &&
-                    isAssing &&
-                    isAssingedPersonIsCurrenUser &&
-                    !isThisInMultiOrder!
-                ? _listTileButton("Atamayı Kaldır", Icons.inbox, Colors.black,
-                    const Color(0xff8a9c9c), () {
+            isAuthSalesCancelAssign && isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
+                ? _listTileButton("Atamayı Kaldır", Icons.inbox, Colors.black, const Color(0xff8a9c9c), () {
                     _complateOrder();
                   })
                 : const SizedBox(),
             isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
-                ? _listTileButton("Sevk Et", Icons.fire_truck, Colors.black,
-                    const Color(0xffe64a19), () async {
+                ? _listTileButton("Sevk Et", Icons.fire_truck, Colors.black, const Color(0xffe64a19), () async {
                     /*
                     _showLoadingScreen(true, "İrsaliye Oluşturuluyor");
                     waybillRequestBody = _createWaybillBodyNew();
@@ -1741,20 +1594,15 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                           "İrsaliye oluşturulmadı, sipariş ücreti risk limitinin arasındaki fark: \n $differenceWithRiskLimit");
                     } else {
                       // await _changeWarehouseBasedOnItems();
-                      bool isWaybillItemNotEmpty =
-                          _checkForWaybillItemsNotEmpty();
+                      bool isWaybillItemNotEmpty = _checkForWaybillItemsNotEmpty();
                       if (isWaybillItemNotEmpty) {
                         waybillRequestBody = await _createWaybillBodyNew();
                         try {
-                          bool isDone = await apiRepository
-                              .createWaybill(waybillRequestBody!);
-                          bool isAllItemCollected =
-                              _checkAllItemsCollectedCompletely();
+                          bool isDone = await apiRepository.createWaybill(waybillRequestBody!);
+                          bool isAllItemCollected = _checkAllItemsCollectedCompletely();
                           if (isAllItemCollected) {
                             orderStatusId = EntityConstants.OrderStatusKapandi;
-                            orderStatusName =
-                                EntityConstants.getStatusDescription(
-                                    orderStatusId);
+                            orderStatusName = EntityConstants.getStatusDescription(orderStatusId);
                             await _changeOrderStatusRequest();
                           }
                           if (isDone) {
@@ -1770,14 +1618,11 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                             bool isCreated = await _completeTheOrder2();
                             if (isCreated) {
                               _deleteOrderSummaryOnLocal();
-                              _showLoadingScreen(
-                                  false, "İrsaliye Oluşturuluyor");
+                              _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                               _showDialogMessage("Başarılı", "İşlem Başarılı.");
                             } else {
-                              _showLoadingScreen(
-                                  false, "İrsaliye Oluşturuluyor");
-                              _showErrorMessage(
-                                  "İrsaliye oluşturuldu, Sipariş bırakılamadı !");
+                              _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
+                              _showErrorMessage("İrsaliye oluşturuldu, Sipariş bırakılamadı !");
                             }
                           } else {
                             // _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
@@ -1801,10 +1646,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                   })
                 : const SizedBox(),
             isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
-                ? _listTileButton(
-                    "Stok Kontrolü Yap",
-                    Icons.inventory_2_rounded,
-                    const Color.fromARGB(255, 75, 75, 75),
+                ? _listTileButton("Stok Kontrolü Yap", Icons.inventory_2_rounded, const Color.fromARGB(255, 75, 75, 75),
                     const Color.fromARGB(255, 255, 228, 176), () async {
                     await _checkStockForEachRow();
                   })
@@ -1945,36 +1787,30 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "İrsaliye Tipi",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: waybillTypeItem.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(
-                              waybillTypeItem[index].type, () {
-                            waybillTypeName = waybillTypeItem[index].type;
-                            waybillTypeId = waybillTypeItem[index].id;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: waybillTypeItem.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(waybillTypeItem[index].type, () {
+                        waybillTypeName = waybillTypeItem[index].type;
+                        waybillTypeId = waybillTypeItem[index].id;
 
-                            print("$waybillTypeName  $waybillTypeId");
-                            Navigator.pop(context);
-                            setState(() {});
-                          });
-                        },
-                      )
-                    ]),
+                        print("$waybillTypeName  $waybillTypeId");
+                        Navigator.pop(context);
+                        setState(() {});
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -1983,8 +1819,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     );
   }
 
-  Row _selectOrderStatusFromList(
-      String initTitle, String title, Function()? onTap) {
+  Row _selectOrderStatusFromList(String initTitle, String title, Function()? onTap) {
     return Row(
       children: [
         Expanded(
@@ -2012,8 +1847,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color:
-                      title == initTitle ? Colors.blueGrey[200] : Colors.black,
+                  color: title == initTitle ? Colors.blueGrey[200] : Colors.black,
                 ),
               ),
             ),
@@ -2072,8 +1906,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
   void showOrderStatusBottomSheet() {
     showModalBottomSheet(
       context: context,
-      builder: (context) =>
-          _selectOrderStatusBottomSheet(EntityConstants.OrderStatusList),
+      builder: (context) => _selectOrderStatusBottomSheet(EntityConstants.OrderStatusList),
     );
   }
 
@@ -2107,37 +1940,30 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Sipariş Durumları",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: orderStasuses.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(orderStasuses[index],
-                              () async {
-                            orderStatusName = orderStasuses[index];
-                            orderStatusId = EntityConstants.getStatusId(
-                                orderStasuses[index]);
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: orderStasuses.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(orderStasuses[index], () async {
+                        orderStatusName = orderStasuses[index];
+                        orderStatusId = EntityConstants.getStatusId(orderStasuses[index]);
 
-                            await _changeOrderStatusRequest();
-                            setState(() {});
-                            Navigator.pop(context);
-                          });
-                        },
-                      )
-                    ]),
+                        await _changeOrderStatusRequest();
+                        setState(() {});
+                        Navigator.pop(context);
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -2147,8 +1973,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
   }
 
 //burası
-  Row _openBottomSheetAndSelectFromTile(
-      String initTitle, String title, Function()? onTap) {
+  Row _openBottomSheetAndSelectFromTile(String initTitle, String title, Function()? onTap) {
     return Row(
       children: [
         Expanded(
@@ -2176,8 +2001,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color:
-                      title == initTitle ? Colors.blueGrey[200] : Colors.black,
+                  color: title == initTitle ? Colors.blueGrey[200] : Colors.black,
                 ),
               ),
             ),
@@ -2238,15 +2062,13 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     if (!isPartialOrder) {
       if (_isScannedQtyEqualQty()) {
         print("bütün itemlar eşit");
-        showDialogForAssingOrder(
-            context, false, "Siparişi bırakmak istediğinize emin misiniz ?");
+        showDialogForAssingOrder(context, false, "Siparişi bırakmak istediğinize emin misiniz ?");
       } else {
         print("bütün itemlar eşit değil");
         _showErrorMessage("Bütün siparişleri tamamlamadınız.");
       }
     } else {
-      showDialogForAssingOrder(
-          context, false, "Siparişi bırakmak istediğinize emin misiniz ?");
+      showDialogForAssingOrder(context, false, "Siparişi bırakmak istediğinize emin misiniz ?");
     }
 
     // if (isPartialOrder) {
@@ -2277,13 +2099,11 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
 
   Future<void> _changeWarehouseBasedOnItems() async {
     if (orderDetailItemList!.length == 1) {
-      if (warehouseId.toLowerCase() !=
-          orderDetailItemList![0].warehouseId!.toLowerCase()) {
+      if (warehouseId.toLowerCase() != orderDetailItemList![0].warehouseId!.toLowerCase()) {
         warehouseId = orderDetailItemList![0].warehouseId!;
         var result = await apiRepository.getWarehouseReverse(warehouseId);
         departmentId = result.warehouse?.departments?.departmentId ?? "";
-        workplaceId =
-            result.warehouse?.departments?.workplace?.workplaceId ?? "";
+        workplaceId = result.warehouse?.departments?.workplace?.workplaceId ?? "";
       }
     } else if (orderDetailItemList!.length > 1) {
       int maxScannedQty = -1;
@@ -2299,14 +2119,12 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     }
   }
 
-  Padding _listTileButton(String content, IconData icon, Color textColor,
-      Color backgroundColor, VoidCallback? onTap) {
+  Padding _listTileButton(String content, IconData icon, Color textColor, Color backgroundColor, VoidCallback? onTap) {
     return Padding(
       padding: const EdgeInsets.only(top: 5),
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(
-              30), // Kenar yuvarlaklığını burada ayarlayabilirsiniz
+          borderRadius: BorderRadius.circular(30), // Kenar yuvarlaklığını burada ayarlayabilirsiniz
         ),
         color: backgroundColor,
         child: InkWell(
@@ -2411,15 +2229,11 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
 
   AppBar _appBar() {
     return AppBar(
-      iconTheme: IconThemeData(
-          color: Colors.deepOrange[700], size: 32 //change your color here
+      iconTheme: IconThemeData(color: Colors.deepOrange[700], size: 32 //change your color here
           ),
       title: Text(
         "Satış Sipariş Detayı",
-        style: TextStyle(
-            color: Colors.deepOrange[700],
-            fontWeight: FontWeight.bold,
-            fontSize: 20),
+        style: TextStyle(color: Colors.deepOrange[700], fontWeight: FontWeight.bold, fontSize: 20),
         textAlign: TextAlign.center,
       ),
       centerTitle: true,
@@ -2469,8 +2283,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
   }
 
   Future<String> _getDocNumberFicheNumber() async {
-    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(
-        apiRepository.employeeUid, "5");
+    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(apiRepository.employeeUid, "5");
 
     return getFicheNumberResponse?.docnumber?.lastNum ?? "";
   }
@@ -2478,9 +2291,8 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
   Future<WayybillsRequestBodyNew> _createWaybillBodyNew() async {
     return WayybillsRequestBodyNew(
       customerId: response.order?.customer?.customerId ?? guidEmpty,
-      ficheNo: ficheNoThatCreatedByUser.isEmpty
-          ? await _getDocNumberFicheNumber()
-          : ficheNoThatCreatedByUser,
+      orderId: response.order?.orderId ?? guidEmpty,
+      ficheNo: ficheNoThatCreatedByUser.isEmpty ? await _getDocNumberFicheNumber() : ficheNoThatCreatedByUser,
       // ficheDate: DateFormat('yyyy-MM-dd')
       //     .format(DateTime.parse(response.order!.ficheDate!)),
       // ficheDate: DateFormat('yyyy-MM-dd').format(currentDate),
@@ -2490,25 +2302,21 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       // ficheTime: response.order?.ficheTime,
       ficheTime: DateFormat('HH:mm').format(currentDate),
       docNo: response.order?.docNo,
-      erpInvoiceRef: "deneme",
+      erpInvoiceRef: "",
       workPlaceId: workplaceId,
       department: departmentId,
       warehouse: warehouseId,
-      currencyId: response.order?.currencyId,
+      currencyId: 1,
       totaldiscounted: response.order?.totaldiscounted,
       totalvat: response.order?.totalvat,
       grossTotal: response.order?.grossTotal,
       transporterId: transporterId ?? guidEmpty,
-      shippingAccountId:
-          response.order?.shippingAccount?.customerId ?? guidEmpty,
-      shippingAddressId:
-          response.order?.shippingAddress?.shippingAddressId ?? guidEmpty,
+      shippingAccountId: response.order?.shippingAccount?.customerId ?? guidEmpty,
+      shippingAddressId: response.order?.shippingAddress?.shippingAddressId ?? guidEmpty,
       description: "deneme",
-      shippingTypeId:
-          response.order?.orderShippingType?.shippingTypeId ?? guidEmpty,
-      salesmanId:
-          response.order?.shippingAccount?.salesman?.salesmanId ?? guidEmpty,
-      waybillStatusId: 1,
+      shippingTypeId: response.order?.orderShippingType?.shippingTypeId ?? guidEmpty,
+      salesmanId: response.order?.shippingAccount?.salesman?.salesmanId ?? guidEmpty,
+      waybillStatusId: 2,
       erpId: "",
       erpCode: "",
       waybillTypeId: waybillTypeId,
@@ -2580,42 +2388,37 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
         var element = response.order!.orderItems![j];
 
         if (localElement.productId == element.product!.productId) {
-          if (localElement.scannedQty!.toInt() - element.shippedQty!.toInt() !=
-              0) {
+          if (localElement.scannedQty!.toInt() - element.shippedQty!.toInt() != 0) {
             List<OrderDetailScannedItemDB>? scannedList = [];
             bool isProductLocation = localElement.isProductLocatin!;
 
             // Eğer ürün lokasyonu varsa scannedList'i doldur
             if (isProductLocation) {
-              scannedList = await _dbHelper.getOrderDetailScannedItem(
-                  widget.item.ficheNo!, localElement.orderItemId!);
+              scannedList = await _dbHelper.getOrderDetailScannedItem(widget.item.ficheNo!, localElement.orderItemId!);
             }
 
             waybillItemsList.add(
               WaybillItemsNew(
                 productId: element.product?.productId,
+                orderLineId: element.orderItemId,
                 description: element.description,
                 warehouseId: localElement.warehouseId,
                 productPrice: element.productPrice,
-                qty: (localElement.scannedQty!.toInt() -
-                    element.shippedQty!.toInt()),
+                qty: (localElement.scannedQty!.toInt() - element.shippedQty!.toInt()),
                 total: element.total,
                 discount: element.discount,
                 tax: element.tax,
                 nettotal: element.nettotal,
                 unitId: element.unitId,
                 unitConversionId: element.unitConversionId,
-                stockLocationRelations: isProductLocation
-                    ? _createStockLocationRelationList(scannedList!)
-                    : [],
+                stockLocationRelations: isProductLocation ? _createStockLocationRelationList(scannedList!) : [],
                 currencyId: element.currencyId,
                 erpId: element.erpId,
                 erpCode: element.erpCode,
                 orderReferance: element.orderItemId,
-                erpOrderReferance: 2,
+                erpOrderReferance: int.parse(element.erpId.toString()),
                 waybillItemTypeId: 0,
-                waybillItemDetails:
-                    _createWaybillItemDetails(element.orderItemId!),
+                waybillItemDetails: _createWaybillItemDetails(element.orderItemId!),
               ),
             );
           }
@@ -2626,8 +2429,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     return waybillItemsList;
   }
 
-  List<StockLocationRelations> _createStockLocationRelationList(
-      List<OrderDetailScannedItemDB> scannedList) {
+  List<StockLocationRelations> _createStockLocationRelationList(List<OrderDetailScannedItemDB> scannedList) {
     // Map oluşturup stockLocationId'yi key olarak kullanacağız ve numberOfPieces'ları toplayacağız
     Map<String, int> locationMap = {};
 
@@ -2635,8 +2437,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       if (item.stockLocationId != null && item.numberOfPieces != null) {
         if (locationMap.containsKey(item.stockLocationId)) {
           // Eğer stockLocationId map'te varsa, qty'ye numberOfPieces'ı ekle
-          locationMap[item.stockLocationId!] =
-              locationMap[item.stockLocationId!]! + item.numberOfPieces!;
+          locationMap[item.stockLocationId!] = locationMap[item.stockLocationId!]! + item.numberOfPieces!;
         } else {
           // Eğer stockLocationId map'te yoksa, yeni bir giriş oluştur
           locationMap[item.stockLocationId!] = item.numberOfPieces!;
@@ -2647,8 +2448,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     // Map'teki verileri StockLocationRelations nesnelerine dönüştür
     List<StockLocationRelations> stockLocationRelationsList = [];
     locationMap.forEach((stockLocationId, qty) {
-      stockLocationRelationsList.add(
-          StockLocationRelations(stockLocationId: stockLocationId, qty: qty));
+      stockLocationRelationsList.add(StockLocationRelations(stockLocationId: stockLocationId, qty: qty));
     });
 
     return stockLocationRelationsList;
@@ -2704,16 +2504,13 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     //allWarehouse yerine commonWarehousesForProducts yazdım
     showModalBottomSheet(
       context: context,
-      builder: (context) => _selectWarehouseByAllWarehousBottomSheet(
-          isThereWarehouseBoundForUser
-              ? _limitWarehouseBasedOnSetting(
-                  commonWarehousesForProducts, userSpecialWarehouseList)
-              : commonWarehousesForProducts),
+      builder: (context) => _selectWarehouseByAllWarehousBottomSheet(isThereWarehouseBoundForUser
+          ? _limitWarehouseBasedOnSetting(commonWarehousesForProducts, userSpecialWarehouseList)
+          : commonWarehousesForProducts),
     );
   }
 
-  void selectWarehouseReverseForOnlyOneItem(
-      String orderItemId, String productId) {
+  void selectWarehouseReverseForOnlyOneItem(String orderItemId, String productId) {
     //_filterWarehouseListForPorduct(productId) yerine allWarehouse gelecek sorun çıkarsa
 
     var item = _filterWarehouseListForPorduct(productId);
@@ -2723,8 +2520,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
       builder: (context) => _selectWarehouseForOnlyOneBottomSheet(
           isThereWarehouseBoundForUser
               ? _limitWarehouseBasedOnSettingOnlyOneItem(
-                  _filterWarehouseListForPorduct(productId),
-                  userSpecialWarehouseList)
+                  _filterWarehouseListForPorduct(productId), userSpecialWarehouseList)
               : _filterWarehouseListForPorduct(productId),
           orderItemId),
     );
@@ -2743,8 +2539,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     return list;
   }
 
-  Widget _selectWarehouseByAllWarehousBottomSheet(
-      List<WorkplaceWarehouse> warehouse) {
+  Widget _selectWarehouseByAllWarehousBottomSheet(List<WorkplaceWarehouse> warehouse) {
     double leftPadding = 8.0;
     return Container(
       width: double.infinity,
@@ -2774,59 +2569,45 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Warehouse",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: warehouse.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(warehouse[index].code!,
-                              () async {
-                            warehouseName = warehouse[index].code!;
-                            warehouseId = warehouse[index].warehouseId!;
-                            setState(() {
-                              isLoading = true;
-                            });
-                            var response = await apiRepository
-                                .getWarehouseReverse(warehouseId);
-                            for (int i = 0;
-                                i < orderDetailItemList!.length;
-                                i++) {
-                              await _dbHelper.updateOrderDetailItemWarehouse(
-                                  widget.orderId,
-                                  orderDetailItemList![i].orderItemId!,
-                                  warehouseId,
-                                  warehouseName);
-                            }
-                            orderDetailItemList = await _dbHelper
-                                .getOrderDetailItemList(widget.orderId);
-                            setState(() {
-                              isLoading = false;
-                            });
-                            workplaceId = response.warehouse!.departments!
-                                .workplace!.workplaceId!;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: warehouse.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(warehouse[index].code!, () async {
+                        warehouseName = warehouse[index].code!;
+                        warehouseId = warehouse[index].warehouseId!;
+                        setState(() {
+                          isLoading = true;
+                        });
+                        var response = await apiRepository.getWarehouseReverse(warehouseId);
+                        for (int i = 0; i < orderDetailItemList!.length; i++) {
+                          await _dbHelper.updateOrderDetailItemWarehouse(
+                              widget.orderId, orderDetailItemList![i].orderItemId!, warehouseId, warehouseName);
+                        }
+                        orderDetailItemList = await _dbHelper.getOrderDetailItemList(widget.orderId);
+                        orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
+                        setState(() {
+                          isLoading = false;
+                        });
+                        workplaceId = response.warehouse!.departments!.workplace!.workplaceId!;
 
-                            departmentId =
-                                response.warehouse!.departments!.departmentId!;
+                        departmentId = response.warehouse!.departments!.departmentId!;
 
-                            Navigator.pop(context);
-                            setState(() {});
-                          });
-                        },
-                      )
-                    ]),
+                        Navigator.pop(context);
+                        setState(() {});
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -2835,8 +2616,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     );
   }
 
-  Widget _selectWarehouseForOnlyOneBottomSheet(
-      List<WorkplaceWarehouseOnHandStock> warehouse, String orderItemId) {
+  Widget _selectWarehouseForOnlyOneBottomSheet(List<WorkplaceWarehouseOnHandStock> warehouse, String orderItemId) {
     double leftPadding = 8.0;
     return Container(
       width: double.infinity,
@@ -2866,47 +2646,35 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Warehouse",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: warehouse.length,
-                        itemBuilder: (context, index) {
-                          String title =
-                              "${warehouse[index].warehouse.code!} (${warehouse[index].onHandStock.toString()})";
-                          return _selectingAreaRowItem(title, () async {
-                            var newWarehouseName =
-                                warehouse[index].warehouse.code!;
-                            var newWarehouseId =
-                                warehouse[index].warehouse.warehouseId!;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: warehouse.length,
+                    itemBuilder: (context, index) {
+                      String title = "${warehouse[index].warehouse.code!} (${warehouse[index].onHandStock.toString()})";
+                      return _selectingAreaRowItem(title, () async {
+                        var newWarehouseName = warehouse[index].warehouse.code!;
+                        var newWarehouseId = warehouse[index].warehouse.warehouseId!;
 
-                            await _dbHelper.updateOrderDetailItemWarehouse(
-                                widget.orderId,
-                                orderItemId,
-                                newWarehouseId,
-                                newWarehouseName);
+                        await _dbHelper.updateOrderDetailItemWarehouse(
+                            widget.orderId, orderItemId, newWarehouseId, newWarehouseName);
 
-                            orderDetailItemList = await _dbHelper
-                                .getOrderDetailItemList(widget.orderId);
-
-                            Navigator.pop(context);
-                            setState(() {});
-                          });
-                        },
-                      )
-                    ]),
+                        orderDetailItemList = await _dbHelper.getOrderDetailItemList(widget.orderId);
+                        orderDetailItemList = sortOrderDetailItems(orderDetailItemList!);
+                        Navigator.pop(context);
+                        setState(() {});
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -2931,8 +2699,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     );
   }
 
-  List<WorkplaceWarehouse> _limitWarehouseBasedOnSetting(
-      List<WorkplaceWarehouse> mainList, List<String> limitedList) {
+  List<WorkplaceWarehouse> _limitWarehouseBasedOnSetting(List<WorkplaceWarehouse> mainList, List<String> limitedList) {
     List<WorkplaceWarehouse> newList = [];
     mainList.forEach((element) {
       limitedList.forEach((warehouseId) {
@@ -2950,8 +2717,7 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
     List<WorkplaceWarehouseOnHandStock> newList = [];
     mainList.forEach((element) {
       limitedList.forEach((warehouseId) {
-        if (element.warehouse.warehouseId!.toLowerCase() ==
-            warehouseId.toLowerCase()) {
+        if (element.warehouse.warehouseId!.toLowerCase() == warehouseId.toLowerCase()) {
           newList.add(element);
         }
       });

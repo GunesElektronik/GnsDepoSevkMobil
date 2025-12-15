@@ -38,10 +38,7 @@ class _GNSDrawerMenuState extends State<GNSDrawerMenu> {
             child: Text(
               '${widget.employeeName.toUpperCase()}',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ),
           // ListTile(
@@ -93,10 +90,9 @@ class _GNSDrawerMenuState extends State<GNSDrawerMenu> {
               color: Colors.deepOrange,
               size: 20,
             ),
-            title: const Text('Kurulum Yap'),
+            title: const Text('Şİrket Değiştir'),
             onTap: () async {
-              await showDialogForReinstallation(
-                  context, "Bu işlem sonunda yerel veritabanı silinecektir.");
+              await showDialogForReinstallation(context, "Bu işlem sonunda yerel veritabanı silinecektir.");
             },
           ),
           ListTile(
@@ -127,8 +123,7 @@ class _GNSDrawerMenuState extends State<GNSDrawerMenu> {
               return Login();
             }));
             */
-              await showDialogForLogout(
-                  context, "Bu işlem sonunda yerel veritabanı silinecektir.");
+              await showDialogForLogout(context, "Bu işlem sonunda yerel veritabanı silinecektir.");
               // ServiceSharedPreferences.setSharedString("jwtToken", "");
               // Navigator.pushAndRemoveUntil(
               //   context,
@@ -146,43 +141,29 @@ class _GNSDrawerMenuState extends State<GNSDrawerMenu> {
 
   Future<void> _clearAllDatabaseTable() async {
     ServiceSharedPreferences.setSharedString("jwtToken", "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.userWarehouseAuthIn, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.showPriceOnOrder, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.userDefaultWarehouseIn, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.userDefaultWarehouseOut, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.userWarehouseAuthOut, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.userWarehouseAuthIn, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.showPriceOnOrder, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.userDefaultWarehouseIn, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.userDefaultWarehouseOut, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.userWarehouseAuthOut, "");
 
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.isAuthSalesCancelAssign, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.isAuthSalesMakeAssign, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.isAuthSalesChangeOrderStatus, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.isAuthPurchaseCancelAssign, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.isAuthPurchaseMakeAssign, "");
-    ServiceSharedPreferences.setSharedString(
-        UserSpecialSettingsUtils.isAuthPurchaseChangeOrderStatus, "");
-    ServiceSharedPreferences.setSharedInt(
-        UserSpecialSettingsUtils.userOrderListFilterId, 1);
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.isAuthSalesCancelAssign, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.isAuthSalesMakeAssign, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.isAuthSalesChangeOrderStatus, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.isAuthPurchaseCancelAssign, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.isAuthPurchaseMakeAssign, "");
+    ServiceSharedPreferences.setSharedString(UserSpecialSettingsUtils.isAuthPurchaseChangeOrderStatus, "");
+    ServiceSharedPreferences.setSharedInt(UserSpecialSettingsUtils.userOrderListFilterId, 1);
 
     await _dbHelper.clearAllDatabase();
   }
 
-  Future<dynamic> showDialogForReinstallation(
-      BuildContext context, String content) {
+  Future<dynamic> showDialogForReinstallation(BuildContext context, String content) {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -226,8 +207,7 @@ class _GNSDrawerMenuState extends State<GNSDrawerMenu> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(

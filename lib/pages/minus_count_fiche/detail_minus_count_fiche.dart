@@ -26,10 +26,8 @@ class _MinusCountFicheDetailState extends State<MinusCountFicheDetail> {
 
   _createApiRepository() async {
     apiRepository = await ApiRepository.create(context);
-    detailResponse =
-        await apiRepository.getMinusCountFicheDetail(widget.minusCountFicheId);
-    minusCountFicheItemList =
-        detailResponse.minusCountFiche?.minusCountFicheItems ?? [];
+    detailResponse = await apiRepository.getMinusCountFicheDetail(widget.minusCountFicheId);
+    minusCountFicheItemList = detailResponse.minusCountFiche?.minusCountFicheItems ?? [];
     setState(() {
       isFetched = true;
     });
@@ -64,8 +62,7 @@ class _MinusCountFicheDetailState extends State<MinusCountFicheDetail> {
               children: [
                 Text(
                   detailResponse.minusCountFiche?.ficheNo ?? "",
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -79,26 +76,20 @@ class _MinusCountFicheDetailState extends State<MinusCountFicheDetail> {
             const SizedBox(
               height: 5,
             ),
-            _infoRow(
-                "Müşteri",
-                detailResponse.minusCountFiche?.customer?.name.toString() ??
-                    ""),
+            _infoRow("Müşteri", detailResponse.minusCountFiche?.customer?.name.toString() ?? ""),
             _divider(),
             _infoRow(
                 "Tarih",
-                DateFormat('dd-MM-yyyy').format(DateTime.parse(
-                    detailResponse.minusCountFiche?.ficheDate ??
-                        "01-01-2000"))),
+                DateFormat('dd-MM-yyyy')
+                    .format(DateTime.parse(detailResponse.minusCountFiche?.ficheDate ?? "01-01-2000"))),
 
             _divider(),
-            _infoRow("Proje",
-                detailResponse.minusCountFiche?.project?.code.toString() ?? ""),
+            _infoRow("Proje", detailResponse.minusCountFiche?.project?.code.toString() ?? ""),
             _divider(),
-            _infoRow("Adet", "5"),
-            _divider(),
+            // _infoRow("Adet", "5"),
+            // _divider(),
 
-            _infoRow("Açıklama",
-                detailResponse.minusCountFiche?.description.toString() ?? ""),
+            _infoRow("Açıklama", detailResponse.minusCountFiche?.description.toString() ?? ""),
             _divider(),
             _inAndOutWorkplaceInfo(),
             const SizedBox(
@@ -122,21 +113,14 @@ class _MinusCountFicheDetailState extends State<MinusCountFicheDetail> {
                       splashColor: Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                       child: ListTile(
-                        contentPadding:
-                            const EdgeInsets.only(right: 15, left: 15),
+                        contentPadding: const EdgeInsets.only(right: 15, left: 15),
                         leading: Text(
                           (index + 1 < 10) ? "0${index + 1}" : "${index + 1}",
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[700]),
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
                         ),
                         trailing: Text(
                           "${minusCountFicheItemList[index].qty!.toInt()}",
-                          style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepOrange),
+                          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.deepOrange),
                         ),
                         title: Text(
                           "${minusCountFicheItemList[index].product!.barcode}",
@@ -148,24 +132,16 @@ class _MinusCountFicheDetailState extends State<MinusCountFicheDetail> {
                             color: Color(0xff727272),
                           ),
                         ),
-                        subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "${minusCountFicheItemList[index].product!.definition}",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.grey[700]),
-                              ),
-                              Text(
-                                "${minusCountFicheItemList[index].inWarehouse!.definition}",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.grey[700]),
-                              )
-                            ]),
+                        subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(
+                            "${minusCountFicheItemList[index].product!.definition}",
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                          ),
+                          Text(
+                            "${minusCountFicheItemList[index].inWarehouse!.definition}",
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                          )
+                        ]),
                       ),
                     ),
                   );
@@ -198,29 +174,16 @@ class _MinusCountFicheDetailState extends State<MinusCountFicheDetail> {
                   padding: EdgeInsets.only(bottom: 5),
                   child: Text(
                     "Giriş",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange),
                   ),
                 ),
                 _infoRowForWorkplace(
-                    "İş Yeri",
-                    detailResponse.minusCountFiche?.inWorkplace?.definition
-                            .toString() ??
-                        ""),
+                    "İş Yeri", detailResponse.minusCountFiche?.inWorkplace?.definition.toString() ?? ""),
                 _divider(),
                 _infoRowForWorkplace(
-                    "Departman",
-                    detailResponse.minusCountFiche?.inDepartment?.definition
-                            .toString() ??
-                        ""),
+                    "Departman", detailResponse.minusCountFiche?.inDepartment?.definition.toString() ?? ""),
                 _divider(),
-                _infoRowForWorkplace(
-                    "Ambar",
-                    detailResponse.minusCountFiche?.inWarehouse?.definition
-                            .toString() ??
-                        ""),
+                _infoRowForWorkplace("Ambar", detailResponse.minusCountFiche?.inWarehouse?.definition.toString() ?? ""),
               ],
             ),
           ),
@@ -327,9 +290,7 @@ class _MinusCountFicheDetailState extends State<MinusCountFicheDetail> {
           child: Text(
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            detailResponse.minusCountFiche?.inWarehouse?.definition
-                    .toString() ??
-                "",
+            detailResponse.minusCountFiche?.inWarehouse?.definition.toString() ?? "",
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -344,15 +305,11 @@ class _MinusCountFicheDetailState extends State<MinusCountFicheDetail> {
 
   AppBar _appBar() {
     return AppBar(
-      iconTheme: IconThemeData(
-          color: Colors.deepOrange[700], size: 32 //change your color here
+      iconTheme: IconThemeData(color: Colors.deepOrange[700], size: 32 //change your color here
           ),
       title: Text(
         "Sayım Eksiği Fişi Detayı",
-        style: TextStyle(
-            color: Colors.deepOrange[700],
-            fontWeight: FontWeight.bold,
-            fontSize: 20),
+        style: TextStyle(color: Colors.deepOrange[700], fontWeight: FontWeight.bold, fontSize: 20),
         textAlign: TextAlign.center,
       ),
       centerTitle: true,

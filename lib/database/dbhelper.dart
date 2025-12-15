@@ -16,8 +16,7 @@ import 'package:gns_warehouse/models/purchase_order_summary_local.dart';
 import 'package:path/path.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
-import 'package:path_provider/path_provider.dart'
-    show getApplicationDocumentsDirectory;
+import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
 import 'package:sqflite/sqflite.dart';
 
 import '../models/order_summary.dart';
@@ -37,15 +36,14 @@ class DbHelper {
   Future<Database> _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
-    return await openDatabase(path,
-        version: _databaseVersion, onCreate: createDb);
+    return await openDatabase(path, version: _databaseVersion, onCreate: createDb);
   }
 
   void createDb(Database db, int version) async {
     await db.execute(
         "CREATE TABLE OrderHeader (recid INTEGER PRIMARY KEY AUTOINCREMENT,id NVARCHAR(40), ficheNo NVARCHAR(40), ficheDate INTEGER, customer NVARCHAR(250), shippingMethod NVARCHAR(100), warehouse NVARCHAR(150), lineCount NVARCHAR(10), orderStatus NVARCHAR(40), totalQty NVARCHAR(10), total NVARCHAR(40), isAssing INTEGER, assingmentEmail NVARCHAR(120), assingCode NVARCHAR(80), assingmetFullname NVARCHAR(120), isPartialOrder INTEGER, cancelled INTEGER)");
     await db.execute(
-        "CREATE TABLE OrderHeaderDetailItems (recid INTEGER PRIMARY KEY AUTOINCREMENT,orderId NVARCHAR(40), orderItemId NVARCHAR(40), productId NVARCHAR(40), warehouseId NVARCHAR(40), stockLocationId NVARCHAR(40), ficheNo NVARCHAR(40), productName NVARCHAR(40), productBarcode NVARCHAR(20), warehouse NVARCHAR(150), isProductLocatin INTEGER, isExceededStockCount INTEGER ,stockLocationName NVARCHAR(150) ,serilotType INTEGER,scannedQty INTEGER,  qty INTEGER, shippedQty INTEGER)");
+        "CREATE TABLE OrderHeaderDetailItems (recid INTEGER PRIMARY KEY AUTOINCREMENT,orderId NVARCHAR(40), orderItemId NVARCHAR(40), productId NVARCHAR(40), warehouseId NVARCHAR(40), stockLocationId NVARCHAR(40), ficheNo NVARCHAR(40), productName NVARCHAR(40), productBarcode NVARCHAR(20), warehouse NVARCHAR(150), isProductLocatin INTEGER, isExceededStockCount INTEGER ,stockLocationName NVARCHAR(150) ,serilotType INTEGER,scannedQty INTEGER,  qty INTEGER, shippedQty INTEGER,lineNr INTEGER)");
     await db.execute(
         "CREATE TABLE OrderDetailScannedItems (recid INTEGER PRIMARY KEY AUTOINCREMENT, ficheNo NVARCHAR(40), orderItemId NVARCHAR(40),productBarcode NVARCHAR(20), warehouse NVARCHAR(40) , stockLocationId NVARCHAR(40) ,stockLocationName NVARCHAR(40) ,numberOfPieces INTEGER)");
     await db.execute(
@@ -53,7 +51,7 @@ class DbHelper {
     await db.execute(
         "CREATE TABLE PurchaseOrderSummary (recid INTEGER PRIMARY KEY AUTOINCREMENT,purchaseOrderId NVARCHAR(40), ficheNo NVARCHAR(40), ficheDate INTEGER, customer NVARCHAR(250), shippingMethod NVARCHAR(100), warehouse NVARCHAR(150), lineCount NVARCHAR(10), orderStatus NVARCHAR(40), totalQty NVARCHAR(10), total NVARCHAR(40), isAssing INTEGER, assingmentEmail NVARCHAR(120), assingCode NVARCHAR(80), assingmetFullname NVARCHAR(120), isPartialOrder INTEGER)");
     await db.execute(
-        "CREATE TABLE PurchaseOrderDetailItems (recid INTEGER PRIMARY KEY AUTOINCREMENT,purchaseOrderId NVARCHAR(40), orderItemId NVARCHAR(40), productId NVARCHAR(40), warehouseId NVARCHAR(40), stockLocationId NVARCHAR(40), ficheNo NVARCHAR(40), productName NVARCHAR(40), productBarcode NVARCHAR(20), warehouse NVARCHAR(150), isProductLocatin INTEGER, stockLocationName NVARCHAR(150) ,serilotType INTEGER,scannedQty INTEGER,  qty INTEGER, shippedQty INTEGER)");
+        "CREATE TABLE PurchaseOrderDetailItems (recid INTEGER PRIMARY KEY AUTOINCREMENT,purchaseOrderId NVARCHAR(40), orderItemId NVARCHAR(40), productId NVARCHAR(40), warehouseId NVARCHAR(40), stockLocationId NVARCHAR(40), ficheNo NVARCHAR(40), productName NVARCHAR(40), productBarcode NVARCHAR(20), warehouse NVARCHAR(150), isProductLocatin INTEGER, stockLocationName NVARCHAR(150) ,serilotType INTEGER,scannedQty INTEGER,  qty INTEGER, shippedQty INTEGER,lineNr INTEGER)");
     await db.execute(
         "CREATE TABLE PurchaseOrderDetailScannedItems (recid INTEGER PRIMARY KEY AUTOINCREMENT, ficheNo NVARCHAR(40), orderItemId NVARCHAR(40),productBarcode NVARCHAR(20), warehouse NVARCHAR(40), stockLocationId NVARCHAR(40) ,stockLocationName NVARCHAR(40) ,numberOfPieces INTEGER)");
 
@@ -90,24 +88,22 @@ class DbHelper {
     //await removeOrderHeader(summary.id);
 
     int inserted = await db.rawInsert(
-        'INSERT INTO ProductBarcodes(orderId, productId,barcode, code,convParam1, convParam2) VALUES(?,?,?,?,?,?)',
-        [
-          item.orderId,
-          item.productId,
-          item.barcode,
-          item.code,
-          item.convParam1,
-          item.convParam2,
-        ]);
+        'INSERT INTO ProductBarcodes(orderId, productId,barcode, code,convParam1, convParam2) VALUES(?,?,?,?,?,?)', [
+      item.orderId,
+      item.productId,
+      item.barcode,
+      item.code,
+      item.convParam1,
+      item.convParam2,
+    ]);
 
     return inserted;
   }
 
-  Future<List<ProductBarcodesItemLocal>?> getProductBarcodes(
-      String orderId) async {
+  Future<List<ProductBarcodesItemLocal>?> getProductBarcodes(String orderId) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db
-        .query("ProductBarcodes", where: "orderId = ?", whereArgs: [orderId]);
+    final List<Map<String, dynamic>> maps =
+        await db.query("ProductBarcodes", where: "orderId = ?", whereArgs: [orderId]);
 
     var headers = List.generate(maps.length, (i) {
       return ProductBarcodesItemLocal(
@@ -126,12 +122,10 @@ class DbHelper {
 
   Future<int> clearAllProductBarcodes(String orderId) async {
     Database db = await instance.database;
-    return await db.delete("ProductBarcodes",
-        where: "orderId  = ? ", whereArgs: [orderId]);
+    return await db.delete("ProductBarcodes", where: "orderId  = ? ", whereArgs: [orderId]);
   }
 
-  Future<ProductBarcodesItemLocal?> getProductBarcode(
-      String orderId, String barcode) async {
+  Future<ProductBarcodesItemLocal?> getProductBarcode(String orderId, String barcode) async {
     Database? db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       "ProductBarcodes",
@@ -154,14 +148,8 @@ class DbHelper {
     }
   }
 
-  Future<int> addOrderDetailScannedItem(
-      String ficheNo,
-      String productBarcode,
-      int numberOfPieces,
-      String orderItemId,
-      String stockLocationId,
-      String stockLocationName,
-      String warehouse) async {
+  Future<int> addOrderDetailScannedItem(String ficheNo, String productBarcode, int numberOfPieces, String orderItemId,
+      String stockLocationId, String stockLocationName, String warehouse) async {
     Database db = await instance.database;
 
     //await removeOrderHeader(summary.id);
@@ -203,13 +191,10 @@ class DbHelper {
   //   return headers;
   // }
 
-  Future<List<OrderDetailScannedItemDB>?> getOrderDetailScannedItem(
-      String ficheNo, String orderItemId) async {
+  Future<List<OrderDetailScannedItemDB>?> getOrderDetailScannedItem(String ficheNo, String orderItemId) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-        "OrderDetailScannedItems",
-        where: "ficheNo = ? AND orderItemId = ? ",
-        whereArgs: [ficheNo, orderItemId]);
+    final List<Map<String, dynamic>> maps = await db
+        .query("OrderDetailScannedItems", where: "ficheNo = ? AND orderItemId = ? ", whereArgs: [ficheNo, orderItemId]);
 
     var headers = List.generate(maps.length, (i) {
       return OrderDetailScannedItemDB(
@@ -227,35 +212,27 @@ class DbHelper {
     return headers;
   }
 
-  Future<int> clearAllOrderDetailScannedItems(
-      String ficheNo, String orderItemId) async {
+  Future<int> clearAllOrderDetailScannedItems(String ficheNo, String orderItemId) async {
     Database db = await instance.database;
     return await db.delete("OrderDetailScannedItems",
-        where: "ficheNo  = ? AND orderItemId = ?",
-        whereArgs: [ficheNo, orderItemId]);
+        where: "ficheNo  = ? AND orderItemId = ?", whereArgs: [ficheNo, orderItemId]);
   }
 
   Future<int> removeOrderDetailScannedItems(String ficheNo) async {
     Database db = await instance.database;
-    return await db.delete("OrderDetailScannedItems",
-        where: "ficheNo = ?", whereArgs: [ficheNo]);
+    return await db.delete("OrderDetailScannedItems", where: "ficheNo = ?", whereArgs: [ficheNo]);
   }
 
-  Future<int> clearOrderDetailScannedItem(
-      int recid, String ficheNo, String orderItemId) async {
+  Future<int> clearOrderDetailScannedItem(int recid, String ficheNo, String orderItemId) async {
     Database db = await instance.database;
     return await db.delete("OrderDetailScannedItems",
-        where: "ficheNo  = ? AND orderItemId = ? AND recid = ?",
-        whereArgs: [ficheNo, orderItemId, recid]);
+        where: "ficheNo  = ? AND orderItemId = ? AND recid = ?", whereArgs: [ficheNo, orderItemId, recid]);
   }
 
-  Future<List<OrderDetailItemDB>?> getOrderDetailItemList(
-      String orderId) async {
+  Future<List<OrderDetailItemDB>?> getOrderDetailItemList(String orderId) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-        "OrderHeaderDetailItems",
-        where: "orderId = ?",
-        whereArgs: [orderId]);
+    final List<Map<String, dynamic>> maps =
+        await db.query("OrderHeaderDetailItems", where: "orderId = ?", whereArgs: [orderId]);
 
     var headers = List.generate(maps.length, (i) {
       return OrderDetailItemDB(
@@ -269,21 +246,22 @@ class DbHelper {
         productBarcode: maps[i]["productBarcode"],
         warehouse: maps[i]["warehouse"],
         isProductLocatin: maps[i]["isProductLocatin"] == 1 ? true : false,
-        isExceededStockCount:
-            maps[i]["isExceededStockCount"] == 1 ? true : false,
+        isExceededStockCount: maps[i]["isExceededStockCount"] == 1 ? true : false,
         stockLocationName: maps[i]["stockLocationName"],
         serilotType: maps[i]["serilotType"],
         scannedQty: maps[i]["scannedQty"],
         qty: maps[i]["qty"],
         shippedQty: maps[i]["shippedQty"],
+        lineNr: maps[i]["lineNr"],
       );
     }).toList();
+
+    headers.sort((a, b) => (a.lineNr ?? 0).compareTo(b.lineNr ?? 0));
 
     return headers;
   }
 
-  Future<OrderDetailItemDB?> getOrderDetailItem(
-      String ficheNo, String orderItemId, String warehouse) async {
+  Future<OrderDetailItemDB?> getOrderDetailItem(String ficheNo, String orderItemId, String warehouse) async {
     Database? db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       "OrderHeaderDetailItems",
@@ -303,13 +281,13 @@ class DbHelper {
         productBarcode: maps[0]["productBarcode"],
         warehouse: maps[0]["warehouse"],
         isProductLocatin: maps[0]["isProductLocatin"] == 1 ? true : false,
-        isExceededStockCount:
-            maps[0]["isExceededStockCount"] == 1 ? true : false,
+        isExceededStockCount: maps[0]["isExceededStockCount"] == 1 ? true : false,
         stockLocationName: maps[0]["stockLocationName"],
         serilotType: maps[0]["serilotType"],
         scannedQty: maps[0]["scannedQty"],
         qty: maps[0]["qty"],
         shippedQty: maps[0]["shippedQty"],
+        lineNr: maps[0]["lineNr"],
       );
     } else {
       return null;
@@ -322,7 +300,7 @@ class DbHelper {
     //await removeOrderHeader(summary.id);
 
     int inserted = await db.rawInsert(
-        'INSERT INTO OrderHeaderDetailItems(orderId, orderItemId, productId, warehouseId, stockLocationId, ficheNo, productName, productBarcode, warehouse, isProductLocatin, isExceededStockCount, stockLocationName, serilotType,scannedQty,qty,shippedQty) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO OrderHeaderDetailItems(orderId, orderItemId, productId, warehouseId, stockLocationId, ficheNo, productName, productBarcode, warehouse, isProductLocatin, isExceededStockCount, stockLocationName, serilotType,scannedQty,qty,shippedQty,lineNr) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
         [
           item.orderId,
           item.orderItemId,
@@ -340,17 +318,14 @@ class DbHelper {
           item.scannedQty,
           item.qty,
           item.shippedQty,
+          item.lineNr,
         ]);
 
     return inserted;
   }
 
   Future<void> updateOrderLocationArea(
-      String stockLocationId,
-      String stockLocationName,
-      String orderId,
-      String orderItemId,
-      String warehouse) async {
+      String stockLocationId, String stockLocationName, String orderId, String orderItemId, String warehouse) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'stockLocationId': stockLocationId,
@@ -366,16 +341,13 @@ class DbHelper {
     );
   }
 
-  Future<int> deleteOrderDetailItem(
-      String orderId, String orderItemId, String warehouseId) async {
+  Future<int> deleteOrderDetailItem(String orderId, String orderItemId, String warehouseId) async {
     Database db = await instance.database;
     return await db.delete("OrderHeaderDetailItems",
-        where: "orderId  = ? AND orderItemId = ? AND warehouseId = ?",
-        whereArgs: [orderId, orderItemId, warehouseId]);
+        where: "orderId  = ? AND orderItemId = ? AND warehouseId = ?", whereArgs: [orderId, orderItemId, warehouseId]);
   }
 
-  Future<void> updateOrderDetailItemQty(
-      String orderId, String orderItemId, String warehouseId, int qty) async {
+  Future<void> updateOrderDetailItemQty(String orderId, String orderItemId, String warehouseId, int qty) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'qty': qty,
@@ -389,8 +361,8 @@ class DbHelper {
     );
   }
 
-  Future<void> updateOrderDetailItemShippedQty(String orderId,
-      String orderItemId, String warehouseId, int shippedQty) async {
+  Future<void> updateOrderDetailItemShippedQty(
+      String orderId, String orderItemId, String warehouseId, int shippedQty) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'shippedQty': shippedQty,
@@ -404,8 +376,8 @@ class DbHelper {
     );
   }
 
-  Future<void> updateOrderDetailItemWarehouse(String orderId,
-      String orderItemId, String warehouseId, String warehouse) async {
+  Future<void> updateOrderDetailItemWarehouse(
+      String orderId, String orderItemId, String warehouseId, String warehouse) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'warehouseId': warehouseId,
@@ -415,8 +387,7 @@ class DbHelper {
     await db.update(
       "OrderHeaderDetailItems",
       newData,
-      where:
-          'orderId = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
+      where: 'orderId = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
       whereArgs: [orderId, orderItemId],
     );
   }
@@ -431,20 +402,18 @@ class DbHelper {
     await db.update(
       "OrderHeaderDetailItems",
       newData,
-      where:
-          'orderId = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
+      where: 'orderId = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
       whereArgs: [orderId, orderItemId],
     );
   }
 
   Future<int> clearAllOrderDetailItems(String orderId) async {
     Database db = await instance.database;
-    return await db.delete("OrderHeaderDetailItems",
-        where: "orderId  = ?", whereArgs: [orderId]);
+    return await db.delete("OrderHeaderDetailItems", where: "orderId  = ?", whereArgs: [orderId]);
   }
 
-  Future<void> updateOrderDetailItemScannedQty(int scannedQty, String ficheNo,
-      String orderItemId, String warehouse) async {
+  Future<void> updateOrderDetailItemScannedQty(
+      int scannedQty, String ficheNo, String orderItemId, String warehouse) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'scannedQty': scannedQty,
@@ -460,14 +429,8 @@ class DbHelper {
   }
 
   //purchase order için barkod db methodları
-  Future<int> addPurchaseOrderDetailScannedItem(
-      String ficheNo,
-      String productBarcode,
-      int numberOfPieces,
-      String orderItemId,
-      String stockLocationId,
-      String stockLocationName,
-      String warehouse) async {
+  Future<int> addPurchaseOrderDetailScannedItem(String ficheNo, String productBarcode, int numberOfPieces,
+      String orderItemId, String stockLocationId, String stockLocationName, String warehouse) async {
     Database db = await instance.database;
 
     //await removeOrderHeader(summary.id);
@@ -510,14 +473,11 @@ class DbHelper {
   //   return headers;
   // }
 
-  Future<List<PurchaseOrderDetailScannedItemDB>?>
-      getPurchaseOrderDetailScannedItem(
-          String ficheNo, String orderItemId) async {
+  Future<List<PurchaseOrderDetailScannedItemDB>?> getPurchaseOrderDetailScannedItem(
+      String ficheNo, String orderItemId) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-        "PurchaseOrderDetailScannedItems",
-        where: "ficheNo = ? AND orderItemId = ?",
-        whereArgs: [ficheNo, orderItemId]);
+    final List<Map<String, dynamic>> maps = await db.query("PurchaseOrderDetailScannedItems",
+        where: "ficheNo = ? AND orderItemId = ?", whereArgs: [ficheNo, orderItemId]);
 
     var headers = List.generate(maps.length, (i) {
       return PurchaseOrderDetailScannedItemDB(
@@ -535,35 +495,27 @@ class DbHelper {
     return headers;
   }
 
-  Future<int> clearAllPurchaseOrderDetailScannedItems(
-      String ficheNo, String orderItemId) async {
+  Future<int> clearAllPurchaseOrderDetailScannedItems(String ficheNo, String orderItemId) async {
     Database db = await instance.database;
     return await db.delete("PurchaseOrderDetailScannedItems",
-        where: "ficheNo  = ? AND orderItemId = ?",
-        whereArgs: [ficheNo, orderItemId]);
+        where: "ficheNo  = ? AND orderItemId = ?", whereArgs: [ficheNo, orderItemId]);
   }
 
   Future<int> removePurchaseOrderDetailScannedItems(String ficheNo) async {
     Database db = await instance.database;
-    return await db.delete("PurchaseOrderDetailScannedItems",
-        where: "ficheNo = ?", whereArgs: [ficheNo]);
+    return await db.delete("PurchaseOrderDetailScannedItems", where: "ficheNo = ?", whereArgs: [ficheNo]);
   }
 
-  Future<int> clearPurchaseOrderDetailScannedItem(
-      int recid, String ficheNo, String orderItemId) async {
+  Future<int> clearPurchaseOrderDetailScannedItem(int recid, String ficheNo, String orderItemId) async {
     Database db = await instance.database;
     return await db.delete("PurchaseOrderDetailScannedItems",
-        where: "ficheNo  = ? AND orderItemId = ? AND recid = ?",
-        whereArgs: [ficheNo, orderItemId, recid]);
+        where: "ficheNo  = ? AND orderItemId = ? AND recid = ?", whereArgs: [ficheNo, orderItemId, recid]);
   }
 
-  Future<List<PurchaseOrderDetailItemDB>?> getPurchaseOrderDetailItemList(
-      String purchaseOrderId) async {
+  Future<List<PurchaseOrderDetailItemDB>?> getPurchaseOrderDetailItemList(String purchaseOrderId) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-        "PurchaseOrderDetailItems",
-        where: "purchaseOrderId = ?",
-        whereArgs: [purchaseOrderId]);
+    final List<Map<String, dynamic>> maps =
+        await db.query("PurchaseOrderDetailItems", where: "purchaseOrderId = ?", whereArgs: [purchaseOrderId]);
 
     var headers = List.generate(maps.length, (i) {
       return PurchaseOrderDetailItemDB(
@@ -582,8 +534,11 @@ class DbHelper {
         scannedQty: maps[i]["scannedQty"],
         qty: maps[i]["qty"],
         shippedQty: maps[i]["shippedQty"],
+        lineNr: maps[i]["lineNr"],
       );
     }).toList();
+
+    headers.sort((a, b) => (a.lineNr ?? 0).compareTo(b.lineNr ?? 0));
 
     return headers;
   }
@@ -614,6 +569,7 @@ class DbHelper {
         scannedQty: maps[0]["scannedQty"],
         qty: maps[0]["qty"],
         shippedQty: maps[0]["shippedQty"],
+        lineNr: maps[0]["lineNr"],
       );
     } else {
       return null;
@@ -626,7 +582,7 @@ class DbHelper {
     //await removeOrderHeader(summary.id);
 
     int inserted = await db.rawInsert(
-        'INSERT INTO PurchaseOrderDetailItems(purchaseOrderId, orderItemId, productId, warehouseId, stockLocationId, ficheNo, productName, productBarcode, warehouse, isProductLocatin, stockLocationName, serilotType,scannedQty,qty,shippedQty) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO PurchaseOrderDetailItems(purchaseOrderId, orderItemId, productId, warehouseId, stockLocationId, ficheNo, productName, productBarcode, warehouse, isProductLocatin, stockLocationName, serilotType,scannedQty,qty,shippedQty,lineNr) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
         [
           item.purchaseOrderId,
           item.orderItemId,
@@ -643,17 +599,14 @@ class DbHelper {
           item.scannedQty,
           item.qty,
           item.shippedQty,
+          item.lineNr,
         ]);
 
     return inserted;
   }
 
-  Future<void> updatePurchaseOrderLocationArea(
-      String stockLocationId,
-      String stockLocationName,
-      String purchaseOrderId,
-      String orderItemId,
-      String warehouse) async {
+  Future<void> updatePurchaseOrderLocationArea(String stockLocationId, String stockLocationName, String purchaseOrderId,
+      String orderItemId, String warehouse) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'stockLocationId': stockLocationId,
@@ -669,16 +622,15 @@ class DbHelper {
     );
   }
 
-  Future<int> deletePurchaseOrderDetailItem(
-      String purchaseOrderId, String orderItemId, String warehouseId) async {
+  Future<int> deletePurchaseOrderDetailItem(String purchaseOrderId, String orderItemId, String warehouseId) async {
     Database db = await instance.database;
     return await db.delete("PurchaseOrderDetailItems",
         where: "purchaseOrderId  = ? AND orderItemId = ? AND warehouseId = ?",
         whereArgs: [purchaseOrderId, orderItemId, warehouseId]);
   }
 
-  Future<void> updatePurchaseOrderDetailItemQty(String purchaseOrderId,
-      String orderItemId, String warehouseId, int qty) async {
+  Future<void> updatePurchaseOrderDetailItemQty(
+      String purchaseOrderId, String orderItemId, String warehouseId, int qty) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'qty': qty,
@@ -692,8 +644,8 @@ class DbHelper {
     );
   }
 
-  Future<void> updatePurchaseOrderDetailItemShippedQty(String purchaseOrderId,
-      String orderItemId, String warehouseId, int shippedQty) async {
+  Future<void> updatePurchaseOrderDetailItemShippedQty(
+      String purchaseOrderId, String orderItemId, String warehouseId, int shippedQty) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'shippedQty': shippedQty,
@@ -707,8 +659,8 @@ class DbHelper {
     );
   }
 
-  Future<void> updatePurchaseOrderDetailItemWarehouse(String purchaseOrderId,
-      String orderItemId, String warehouseId, String warehouse) async {
+  Future<void> updatePurchaseOrderDetailItemWarehouse(
+      String purchaseOrderId, String orderItemId, String warehouseId, String warehouse) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'warehouseId': warehouseId,
@@ -718,20 +670,18 @@ class DbHelper {
     await db.update(
       "PurchaseOrderDetailItems",
       newData,
-      where:
-          'purchaseOrderId = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
+      where: 'purchaseOrderId = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
       whereArgs: [purchaseOrderId, orderItemId],
     );
   }
 
   Future<int> clearAllPurchaseOrderDetailItems(String purchaseOrderId) async {
     Database db = await instance.database;
-    return await db.delete("PurchaseOrderDetailItems",
-        where: "purchaseOrderId  = ?", whereArgs: [purchaseOrderId]);
+    return await db.delete("PurchaseOrderDetailItems", where: "purchaseOrderId  = ?", whereArgs: [purchaseOrderId]);
   }
 
-  Future<void> updatePurchaseOrderDetailItemScannedQty(int scannedQty,
-      String ficheNo, String orderItemId, String warehouse) async {
+  Future<void> updatePurchaseOrderDetailItemScannedQty(
+      int scannedQty, String ficheNo, String orderItemId, String warehouse) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'scannedQty': scannedQty,
@@ -822,8 +772,7 @@ class DbHelper {
 
   Future<List<OrderSummary>?> getOrderHeaderList() async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps =
-        await db.query("OrderHeader", orderBy: "ficheDate DESC");
+    final List<Map<String, dynamic>> maps = await db.query("OrderHeader", orderBy: "ficheDate DESC");
 
     var headers = List.generate(maps.length, (i) {
       return OrderSummary(
@@ -895,8 +844,7 @@ class DbHelper {
     return 0;
   }
 
-  Future<void> updateOrderStatusForOrderHeader(
-      String newOrderStatus, String salesOrderId) async {
+  Future<void> updateOrderStatusForOrderHeader(String newOrderStatus, String salesOrderId) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'orderStatus': newOrderStatus,
@@ -912,8 +860,7 @@ class DbHelper {
 
   Future<int> updateOrderHeader(OrderHeader header) async {
     Database db = await instance.database;
-    return await db.update("OrderHeader", header.toMap(),
-        where: "id=?", whereArgs: [header.id]);
+    return await db.update("OrderHeader", header.toMap(), where: "id=?", whereArgs: [header.id]);
   }
 
   Future<int> removeOrderHeader(String id) async {
@@ -942,13 +889,7 @@ class DbHelper {
     final List<Map<String, dynamic>> maps = await db.query("OrderHeader",
         where:
             'ficheNo LIKE ? OR customer LIKE ? OR warehouse LIKE ? OR orderStatus LIKE ? OR assingmetFullname LIKE ?',
-        whereArgs: [
-          '%$searchkey%',
-          '%$searchkey%',
-          '%$searchkey%',
-          '%$searchkey%',
-          '%$searchkey%'
-        ],
+        whereArgs: ['%$searchkey%', '%$searchkey%', '%$searchkey%', '%$searchkey%', '%$searchkey%'],
         orderBy: "ficheDate DESC");
 
     summaryList = List.generate(maps.length, (i) {
@@ -1003,8 +944,7 @@ class DbHelper {
     return inserted;
   }
 
-  Future<void> updateOrderStatusForPurchaseOrderHeader(
-      String newOrderStatus, String purchaseOrderId) async {
+  Future<void> updateOrderStatusForPurchaseOrderHeader(String newOrderStatus, String purchaseOrderId) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'orderStatus': newOrderStatus,
@@ -1018,8 +958,7 @@ class DbHelper {
     );
   }
 
-  Future<int> addPurchaseOrderSummarys(
-      List<PurchaseOrderSummaryItem> summaries) async {
+  Future<int> addPurchaseOrderSummarys(List<PurchaseOrderSummaryItem> summaries) async {
     clearAllPurchaseOrderSummary();
     summaries.forEach((summary) async {
       /*
@@ -1035,15 +974,13 @@ class DbHelper {
 
   Future<int> removePurchaseOrderSummary(String purchaseOrderId) async {
     Database db = await instance.database;
-    return await db.delete("PurchaseOrderSummary",
-        where: "purchaseOrderId=?", whereArgs: [purchaseOrderId]);
+    return await db.delete("PurchaseOrderSummary", where: "purchaseOrderId=?", whereArgs: [purchaseOrderId]);
   }
 
   Future<int> getPurchaseOrderSummaryCount() async {
     Database? db = await instance.database;
 
-    final List<Map<String, dynamic>> maps =
-        await db.query("PurchaseOrderSummary");
+    final List<Map<String, dynamic>> maps = await db.query("PurchaseOrderSummary");
 
     return maps.toList().length;
   }
@@ -1055,8 +992,7 @@ class DbHelper {
 
   Future<List<PurchaseOrderSummaryLocal>?> getPurchaseOrderSummaryList() async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps =
-        await db.query("PurchaseOrderSummary", orderBy: "ficheDate DESC");
+    final List<Map<String, dynamic>> maps = await db.query("PurchaseOrderSummary", orderBy: "ficheDate DESC");
 
     var headers = List.generate(maps.length, (i) {
       return PurchaseOrderSummaryLocal(
@@ -1081,8 +1017,7 @@ class DbHelper {
     return headers;
   }
 
-  Future<PurchaseOrderSummaryLocal?> getPurchaseOrderHeaderById(
-      String orderId) async {
+  Future<PurchaseOrderSummaryLocal?> getPurchaseOrderHeaderById(String orderId) async {
     Database? db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       "PurchaseOrderSummary",
@@ -1113,23 +1048,15 @@ class DbHelper {
     }
   }
 
-  Future<List<PurchaseOrderSummaryLocal>> searchPurchaseOrderHeader(
-      String searchkey) async {
+  Future<List<PurchaseOrderSummaryLocal>> searchPurchaseOrderHeader(String searchkey) async {
     Database? db = await instance.database;
 
     List<PurchaseOrderSummaryLocal> purchaseOrderList = [];
 
-    final List<Map<String, dynamic>> maps = await db.query(
-        "PurchaseOrderSummary",
+    final List<Map<String, dynamic>> maps = await db.query("PurchaseOrderSummary",
         where:
             'ficheNo LIKE ? OR customer LIKE ? OR warehouse LIKE ? OR orderStatus LIKE ? OR assingmetFullname LIKE ?',
-        whereArgs: [
-          '%$searchkey%',
-          '%$searchkey%',
-          '%$searchkey%',
-          '%$searchkey%',
-          '%$searchkey%'
-        ],
+        whereArgs: ['%$searchkey%', '%$searchkey%', '%$searchkey%', '%$searchkey%', '%$searchkey%'],
         orderBy: "ficheDate DESC");
 
     purchaseOrderList = List.generate(maps.length, (i) {
@@ -1194,14 +1121,12 @@ class DbHelper {
 
   Future<int> removeMultiOrder(String waybillsId) async {
     Database db = await instance.database;
-    return await db.delete("LocalWaybills",
-        where: "waybillsId=?", whereArgs: [waybillsId]);
+    return await db.delete("LocalWaybills", where: "waybillsId=?", whereArgs: [waybillsId]);
   }
 
   Future<List<WaybillLocalModel>?> getMultiOrderHeaderList() async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps =
-        await db.query("LocalWaybills", orderBy: "ficheDate DESC");
+    final List<Map<String, dynamic>> maps = await db.query("LocalWaybills", orderBy: "ficheDate DESC");
 
     var headers = List.generate(maps.length, (i) {
       return WaybillLocalModel(
@@ -1235,11 +1160,7 @@ class DbHelper {
 
   //LocalWaybills olanların hepsi aslında multipurchaseorder
   Future<void> updateMultiPurchaseOrderOrderWarehouse(
-      String waybillsId,
-      String workplaceId,
-      String departmentId,
-      String warehouseId,
-      String warehouseName) async {
+      String waybillsId, String workplaceId, String departmentId, String warehouseId, String warehouseName) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'workplaceId': workplaceId,
@@ -1251,8 +1172,7 @@ class DbHelper {
     await db.update(
       "LocalWaybills",
       newData,
-      where:
-          'waybillsId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
+      where: 'waybillsId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
       whereArgs: [waybillsId],
     );
   }
@@ -1271,11 +1191,10 @@ class DbHelper {
   }
 
 //asfasf
-  Future<List<WaybillItemLocalModel>?> getWaybillOrderDetailItemList(
-      String waybillsId) async {
+  Future<List<WaybillItemLocalModel>?> getWaybillOrderDetailItemList(String waybillsId) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query("LocalWaybillsItem",
-        where: "waybillsId = ?", whereArgs: [waybillsId]);
+    final List<Map<String, dynamic>> maps =
+        await db.query("LocalWaybillsItem", where: "waybillsId = ?", whereArgs: [waybillsId]);
 
     var headers = List.generate(maps.length, (i) {
       return WaybillItemLocalModel(
@@ -1303,8 +1222,7 @@ class DbHelper {
         currencyId: maps[i]['currencyId'],
         barcode: maps[i]['barcode'],
         productName: maps[i]['productName'],
-        ficheDate:
-            DateTime.fromMillisecondsSinceEpoch(maps[i]["ficheDate"] as int),
+        ficheDate: DateTime.fromMillisecondsSinceEpoch(maps[i]["ficheDate"] as int),
         erpId: maps[i]['erpId'],
         erpCode: maps[i]['erpCode'],
       );
@@ -1348,8 +1266,7 @@ class DbHelper {
         currencyId: maps[0]['currencyId'],
         barcode: maps[0]['barcode'],
         productName: maps[0]['productName'],
-        ficheDate:
-            DateTime.fromMillisecondsSinceEpoch(maps[0]["ficheDate"] as int),
+        ficheDate: DateTime.fromMillisecondsSinceEpoch(maps[0]["ficheDate"] as int),
         erpId: maps[0]['erpId'],
         erpCode: maps[0]['erpCode'],
       );
@@ -1397,8 +1314,8 @@ class DbHelper {
     return inserted;
   }
 
-  Future<void> updateWaybillDetailItemQty(String waybillsId, String orderId,
-      String orderItemId, String warehouseId, int qty) async {
+  Future<void> updateWaybillDetailItemQty(
+      String waybillsId, String orderId, String orderItemId, String warehouseId, int qty) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'qty': qty,
@@ -1407,14 +1324,13 @@ class DbHelper {
     await db.update(
       "LocalWaybillsItem",
       newData,
-      where:
-          'waybillsId = ? AND orderId = ? AND orderItemId = ? AND warehouseId = ? ',
+      where: 'waybillsId = ? AND orderId = ? AND orderItemId = ? AND warehouseId = ? ',
       whereArgs: [waybillsId, orderId, orderItemId, warehouseId],
     );
   }
 
-  Future<void> updateWaybillDetailItemWarehouse(String waybillsId,
-      String orderItemId, String warehouseId, String warehouseName) async {
+  Future<void> updateWaybillDetailItemWarehouse(
+      String waybillsId, String orderItemId, String warehouseId, String warehouseName) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'warehouseId': warehouseId,
@@ -1424,20 +1340,17 @@ class DbHelper {
     await db.update(
       "LocalWaybillsItem",
       newData,
-      where:
-          'waybillsId = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
+      where: 'waybillsId = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
       whereArgs: [waybillsId, orderItemId],
     );
   }
 
   Future<int> clearAllWaybillOrderDetailItems(String waybillsId) async {
     Database db = await instance.database;
-    return await db.delete("LocalWaybillsItem",
-        where: "waybillsId  = ?", whereArgs: [waybillsId]);
+    return await db.delete("LocalWaybillsItem", where: "waybillsId  = ?", whereArgs: [waybillsId]);
   }
 
-  Future<bool?> isThereAnyItemBasedOrderIdInMultiPurchaseOrder(
-      String orderId) async {
+  Future<bool?> isThereAnyItemBasedOrderIdInMultiPurchaseOrder(String orderId) async {
     Database? db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       "LocalWaybillsItem",
@@ -1452,22 +1365,16 @@ class DbHelper {
     }
   }
 
-  Future<int> deleteWaybillDetailItem(String waybillsId, String orderId,
-      String orderItemId, String warehouseId) async {
+  Future<int> deleteWaybillDetailItem(String waybillsId, String orderId, String orderItemId, String warehouseId) async {
     Database db = await instance.database;
     return await db.delete("LocalWaybillsItem",
-        where:
-            "waybillsId = ? AND orderId  = ? AND orderItemId = ? AND warehouseId = ?",
+        where: "waybillsId = ? AND orderId  = ? AND orderItemId = ? AND warehouseId = ?",
         whereArgs: [waybillsId, orderId, orderItemId, warehouseId]);
   }
 
 //sdfsdfsdf
   Future<void> updateWaybillOrderDetailItemScannedQty(
-      int scannedQty,
-      int productRecid,
-      String waybillsId,
-      String productId,
-      String warehouseId) async {
+      int scannedQty, int productRecid, String waybillsId, String productId, String warehouseId) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'scannedQty': scannedQty,
@@ -1482,15 +1389,8 @@ class DbHelper {
     );
   }
 
-  Future<int> addWaybillOrderScannedItem(
-      int productRecid,
-      String waybillsId,
-      String productBarcode,
-      int numberOfPieces,
-      String productId,
-      String stockLocationId,
-      String stockLocationName,
-      String warehouse) async {
+  Future<int> addWaybillOrderScannedItem(int productRecid, String waybillsId, String productBarcode, int numberOfPieces,
+      String productId, String stockLocationId, String stockLocationName, String warehouse) async {
     Database db = await instance.database;
 
     //await removeOrderHeader(summary.id);
@@ -1540,8 +1440,7 @@ class DbHelper {
   Future<List<WaybillScannedItemDB>?> getWaybillOrderScannedItem(
       int productRecid, String waybillsId, String productId) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-        "LocalWaybillsScannedItem",
+    final List<Map<String, dynamic>> maps = await db.query("LocalWaybillsScannedItem",
         where: "productRecid = ? AND waybillsId = ? AND productId = ?",
         whereArgs: [productRecid, waybillsId, productId]);
 
@@ -1561,8 +1460,7 @@ class DbHelper {
     return headers;
   }
 
-  Future<int> clearAllWaybillOrderScannedItems(
-      int productRecid, String waybillsId, String productId) async {
+  Future<int> clearAllWaybillOrderScannedItems(int productRecid, String waybillsId, String productId) async {
     Database db = await instance.database;
     return await db.delete("LocalWaybillsScannedItem",
         where: "productRecid = ? AND waybillsId  = ? AND productId = ?",
@@ -1571,16 +1469,13 @@ class DbHelper {
 
   Future<int> removeWaybillOrderScannedItems(String waybillsId) async {
     Database db = await instance.database;
-    return await db.delete("LocalWaybillsScannedItem",
-        where: "waybillsId = ?", whereArgs: [waybillsId]);
+    return await db.delete("LocalWaybillsScannedItem", where: "waybillsId = ?", whereArgs: [waybillsId]);
   }
 
-  Future<int> clearWaybillOrderScannedItem(
-      int recid, String waybillsId, String productId) async {
+  Future<int> clearWaybillOrderScannedItem(int recid, String waybillsId, String productId) async {
     Database db = await instance.database;
     return await db.delete("LocalWaybillsScannedItem",
-        where: "waybillsId  = ? AND productId = ? AND recid = ?",
-        whereArgs: [waybillsId, productId, recid]);
+        where: "waybillsId  = ? AND productId = ? AND recid = ?", whereArgs: [waybillsId, productId, recid]);
   }
 
   //multi sales
@@ -1622,14 +1517,12 @@ class DbHelper {
 
   Future<int> removeMultiSalesOrder(String multiSalesOrder) async {
     Database db = await instance.database;
-    return await db.delete("MultiSalesOrder",
-        where: "multiSalesOrder=?", whereArgs: [multiSalesOrder]);
+    return await db.delete("MultiSalesOrder", where: "multiSalesOrder=?", whereArgs: [multiSalesOrder]);
   }
 
   Future<List<WaybillLocalModel>?> getMultiSalesOrderHeaderList() async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps =
-        await db.query("MultiSalesOrder", orderBy: "ficheDate DESC");
+    final List<Map<String, dynamic>> maps = await db.query("MultiSalesOrder", orderBy: "ficheDate DESC");
 
     var headers = List.generate(maps.length, (i) {
       return WaybillLocalModel(
@@ -1662,11 +1555,7 @@ class DbHelper {
   }
 
   Future<void> updateMultiSalesOrderWarehouse(
-      String multiSalesOrder,
-      String workplaceId,
-      String departmentId,
-      String warehouseId,
-      String warehouseName) async {
+      String multiSalesOrder, String workplaceId, String departmentId, String warehouseId, String warehouseName) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'workplaceId': workplaceId,
@@ -1678,14 +1567,12 @@ class DbHelper {
     await db.update(
       "MultiSalesOrder",
       newData,
-      where:
-          'multiSalesOrder = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
+      where: 'multiSalesOrder = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
       whereArgs: [multiSalesOrder],
     );
   }
 
-  Future<int> addMultiSalesOrderHeaders(
-      List<WaybillLocalModel> summaries) async {
+  Future<int> addMultiSalesOrderHeaders(List<WaybillLocalModel> summaries) async {
     clearAllMultiOrderHeader();
     summaries.forEach((summary) async {
       addMultiPurchaseOrder(summary);
@@ -1699,13 +1586,10 @@ class DbHelper {
   }
 
 //asfasf
-  Future<List<WaybillItemLocalModel>?> getMultiSalesOrderDetailItemList(
-      String multiSalesOrder) async {
+  Future<List<WaybillItemLocalModel>?> getMultiSalesOrderDetailItemList(String multiSalesOrder) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-        "MultiSalesOrderItem",
-        where: "multiSalesOrder = ?",
-        whereArgs: [multiSalesOrder]);
+    final List<Map<String, dynamic>> maps =
+        await db.query("MultiSalesOrderItem", where: "multiSalesOrder = ?", whereArgs: [multiSalesOrder]);
 
     var headers = List.generate(maps.length, (i) {
       return WaybillItemLocalModel(
@@ -1733,8 +1617,7 @@ class DbHelper {
         currencyId: maps[i]['currencyId'],
         barcode: maps[i]['barcode'],
         productName: maps[i]['productName'],
-        ficheDate:
-            DateTime.fromMillisecondsSinceEpoch(maps[i]["ficheDate"] as int),
+        ficheDate: DateTime.fromMillisecondsSinceEpoch(maps[i]["ficheDate"] as int),
         erpId: maps[i]['erpId'],
         erpCode: maps[i]['erpCode'],
       );
@@ -1778,8 +1661,7 @@ class DbHelper {
         currencyId: maps[0]['currencyId'],
         barcode: maps[0]['barcode'],
         productName: maps[0]['productName'],
-        ficheDate:
-            DateTime.fromMillisecondsSinceEpoch(maps[0]["ficheDate"] as int),
+        ficheDate: DateTime.fromMillisecondsSinceEpoch(maps[0]["ficheDate"] as int),
         erpId: maps[0]['erpId'],
         erpCode: maps[0]['erpCode'],
       );
@@ -1827,8 +1709,8 @@ class DbHelper {
     return inserted;
   }
 
-  Future<void> updateMultiSalesDetailItemQty(String multiSalesOrder,
-      String orderId, String orderItemId, String warehouseId, int qty) async {
+  Future<void> updateMultiSalesDetailItemQty(
+      String multiSalesOrder, String orderId, String orderItemId, String warehouseId, int qty) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'qty': qty,
@@ -1837,14 +1719,13 @@ class DbHelper {
     await db.update(
       "MultiSalesOrderItem",
       newData,
-      where:
-          'multiSalesOrder = ? AND orderId = ? AND orderItemId = ? AND warehouseId = ? ',
+      where: 'multiSalesOrder = ? AND orderId = ? AND orderItemId = ? AND warehouseId = ? ',
       whereArgs: [multiSalesOrder, orderId, orderItemId, warehouseId],
     );
   }
 
-  Future<void> updateMultiSalesDetailItemWarehouse(String multiSalesOrder,
-      String orderItemId, String warehouseId, String warehouseName) async {
+  Future<void> updateMultiSalesDetailItemWarehouse(
+      String multiSalesOrder, String orderItemId, String warehouseId, String warehouseName) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'warehouseId': warehouseId,
@@ -1854,20 +1735,17 @@ class DbHelper {
     await db.update(
       "MultiSalesOrderItem",
       newData,
-      where:
-          'multiSalesOrder = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
+      where: 'multiSalesOrder = ? AND orderItemId = ? ', // Güncellenecek satırı belirtmek için bir koşul sağlayın
       whereArgs: [multiSalesOrder, orderItemId],
     );
   }
 
   Future<int> clearAllMultiSalesOrderDetailItems(String multiSalesOrder) async {
     Database db = await instance.database;
-    return await db.delete("MultiSalesOrderItem",
-        where: "multiSalesOrder  = ?", whereArgs: [multiSalesOrder]);
+    return await db.delete("MultiSalesOrderItem", where: "multiSalesOrder  = ?", whereArgs: [multiSalesOrder]);
   }
 
-  Future<bool?> isThereAnyItemBasedOrderIdInMultiSalesOrder(
-      String orderId) async {
+  Future<bool?> isThereAnyItemBasedOrderIdInMultiSalesOrder(String orderId) async {
     Database? db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       "MultiSalesOrderItem",
@@ -1882,22 +1760,17 @@ class DbHelper {
     }
   }
 
-  Future<int> deleteMultiSalesDetailItem(String multiSalesOrder, String orderId,
-      String orderItemId, String warehouseId) async {
+  Future<int> deleteMultiSalesDetailItem(
+      String multiSalesOrder, String orderId, String orderItemId, String warehouseId) async {
     Database db = await instance.database;
     return await db.delete("MultiSalesOrderItem",
-        where:
-            "multiSalesOrder = ? AND orderId  = ? AND orderItemId = ? AND warehouseId = ?",
+        where: "multiSalesOrder = ? AND orderId  = ? AND orderItemId = ? AND warehouseId = ?",
         whereArgs: [multiSalesOrder, orderId, orderItemId, warehouseId]);
   }
 
 //sdfsdfsdf
   Future<void> updateMultiSalesOrderDetailItemScannedQty(
-      int scannedQty,
-      int productRecid,
-      String multiSalesOrder,
-      String productId,
-      String warehouseId) async {
+      int scannedQty, int productRecid, String multiSalesOrder, String productId, String warehouseId) async {
     Database db = await instance.database;
     Map<String, dynamic> newData = {
       'scannedQty': scannedQty,
@@ -1912,15 +1785,8 @@ class DbHelper {
     );
   }
 
-  Future<int> addMultiSalesOrderScannedItem(
-      int productRecid,
-      String multiSalesOrder,
-      String productBarcode,
-      int numberOfPieces,
-      String productId,
-      String stockLocationId,
-      String stockLocationName,
-      String warehouse) async {
+  Future<int> addMultiSalesOrderScannedItem(int productRecid, String multiSalesOrder, String productBarcode,
+      int numberOfPieces, String productId, String stockLocationId, String stockLocationName, String warehouse) async {
     Database db = await instance.database;
 
     //await removeOrderHeader(summary.id);
@@ -1970,8 +1836,7 @@ class DbHelper {
   Future<List<WaybillScannedItemDB>?> getMultiSalesOrderScannedItem(
       int productRecid, String multiSalesOrder, String productId) async {
     Database? db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-        "MultiSalesOrderScannedItem",
+    final List<Map<String, dynamic>> maps = await db.query("MultiSalesOrderScannedItem",
         where: "productRecid = ? AND multiSalesOrder = ? AND productId = ?",
         whereArgs: [productRecid, multiSalesOrder, productId]);
 
@@ -1991,8 +1856,7 @@ class DbHelper {
     return headers;
   }
 
-  Future<int> clearAllMultiSalesOrderScannedItems(
-      int productRecid, String multiSalesOrder, String productId) async {
+  Future<int> clearAllMultiSalesOrderScannedItems(int productRecid, String multiSalesOrder, String productId) async {
     Database db = await instance.database;
     return await db.delete("MultiSalesOrderScannedItem",
         where: "productRecid = ? AND multiSalesOrder  = ? AND productId = ?",
@@ -2001,16 +1865,13 @@ class DbHelper {
 
   Future<int> removeMultiSalesOrderScannedItems(String multiSalesOrder) async {
     Database db = await instance.database;
-    return await db.delete("MultiSalesOrderScannedItem",
-        where: "multiSalesOrder = ?", whereArgs: [multiSalesOrder]);
+    return await db.delete("MultiSalesOrderScannedItem", where: "multiSalesOrder = ?", whereArgs: [multiSalesOrder]);
   }
 
-  Future<int> clearMultiSalesOrderScannedItem(
-      int recid, String multiSalesOrder, String productId) async {
+  Future<int> clearMultiSalesOrderScannedItem(int recid, String multiSalesOrder, String productId) async {
     Database db = await instance.database;
     return await db.delete("MultiSalesOrderScannedItem",
-        where: "multiSalesOrder  = ? AND productId = ? AND recid = ?",
-        whereArgs: [multiSalesOrder, productId, recid]);
+        where: "multiSalesOrder  = ? AND productId = ? AND recid = ?", whereArgs: [multiSalesOrder, productId, recid]);
   }
   //multi sales
 

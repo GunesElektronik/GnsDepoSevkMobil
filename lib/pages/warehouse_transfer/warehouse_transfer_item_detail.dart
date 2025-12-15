@@ -6,12 +6,10 @@ class WarehouseTransferItemDetail extends StatefulWidget {
   WarehouseTransferItemDetail({super.key, required this.item});
   WarehouseTransferListItems item;
   @override
-  State<WarehouseTransferItemDetail> createState() =>
-      _WarehouseTransferItemDetailState();
+  State<WarehouseTransferItemDetail> createState() => _WarehouseTransferItemDetailState();
 }
 
-class _WarehouseTransferItemDetailState
-    extends State<WarehouseTransferItemDetail> {
+class _WarehouseTransferItemDetailState extends State<WarehouseTransferItemDetail> {
   late WarehouseTransferListItems item;
 
   @override
@@ -43,8 +41,7 @@ class _WarehouseTransferItemDetailState
               children: [
                 Text(
                   item.ficheNo ?? "",
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -60,20 +57,15 @@ class _WarehouseTransferItemDetailState
             ),
 
             _divider(),
-            _infoRow(
-                "Tarih",
-                DateFormat('dd-MM-yyyy')
-                    .format(DateTime.parse(item.ficheDate ?? "01-01-2000"))),
+            _infoRow("Tarih", DateFormat('dd-MM-yyyy').format(DateTime.parse(item.ficheDate ?? "01-01-2000"))),
             _divider(),
-            _infoRow("Müşteri",
-                item.customer == null ? "" : item.customer!.name!.toString()),
+            _infoRow("Müşteri", item.customer == null ? "" : item.customer!.name!.toString()),
             _divider(),
 
-            _infoRow("Adet", item.warehouseTransferItems!.length.toString()),
-            _divider(),
+            // _infoRow("Adet", item.warehouseTransferItems!.length.toString()),
+            // _divider(),
 
-            _infoRow("Açıklama",
-                item.description == null ? "" : item.description.toString()),
+            _infoRow("Açıklama", item.description == null ? "" : item.description.toString()),
             _divider(),
             _inAndOutWorkplaceInfo(),
             const SizedBox(
@@ -97,21 +89,14 @@ class _WarehouseTransferItemDetailState
                       splashColor: Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                       child: ListTile(
-                        contentPadding:
-                            const EdgeInsets.only(right: 15, left: 15),
+                        contentPadding: const EdgeInsets.only(right: 15, left: 15),
                         leading: Text(
                           (index + 1 < 10) ? "0${index + 1}" : "${index + 1}",
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[700]),
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
                         ),
                         trailing: Text(
                           "${item.warehouseTransferItems![index].qty!.toInt()}",
-                          style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepOrange),
+                          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.deepOrange),
                         ),
                         title: Text(
                           "${item.warehouseTransferItems![index].product!.barcode}",
@@ -123,24 +108,16 @@ class _WarehouseTransferItemDetailState
                             color: Color(0xff727272),
                           ),
                         ),
-                        subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "${item.warehouseTransferItems![index].product!.definition}",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.grey[700]),
-                              ),
-                              Text(
-                                "${item.warehouseTransferItems![index].outWarehouse!.definition} -> ${item.warehouseTransferItems![index].inWarehouse!.definition}",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.grey[700]),
-                              )
-                            ]),
+                        subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(
+                            "${item.warehouseTransferItems![index].product!.definition}",
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                          ),
+                          Text(
+                            "${item.warehouseTransferItems![index].outWarehouse!.definition} -> ${item.warehouseTransferItems![index].inWarehouse!.definition}",
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                          )
+                        ]),
                       ),
                     ),
                   );
@@ -173,20 +150,14 @@ class _WarehouseTransferItemDetailState
                   padding: EdgeInsets.only(bottom: 5),
                   child: Text(
                     "Çıkış",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange),
                   ),
                 ),
-                _infoRowForWorkplace(
-                    "İş Yeri", item.outWorkplace!.definition.toString()),
+                _infoRowForWorkplace("İş Yeri", item.outWorkplace!.definition.toString()),
                 _divider(),
-                _infoRowForWorkplace(
-                    "Departman", item.outDepartment!.definition.toString()),
+                _infoRowForWorkplace("Departman", item.outDepartment!.definition.toString()),
                 _divider(),
-                _infoRowForWorkplace(
-                    "Ambar", item.outWarehouse!.definition.toString()),
+                _infoRowForWorkplace("Ambar", item.outWarehouse!.definition.toString()),
               ],
             ),
           ),
@@ -204,20 +175,14 @@ class _WarehouseTransferItemDetailState
                   padding: EdgeInsets.only(bottom: 5),
                   child: Text(
                     "Giriş",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange),
                   ),
                 ),
-                _infoRowForWorkplace(
-                    "İş Yeri", item.inWorkplace!.definition.toString()),
+                _infoRowForWorkplace("İş Yeri", item.inWorkplace!.definition.toString()),
                 _divider(),
-                _infoRowForWorkplace(
-                    "Departman", item.inDepartment!.definition.toString()),
+                _infoRowForWorkplace("Departman", item.inDepartment!.definition.toString()),
                 _divider(),
-                _infoRowForWorkplace(
-                    "Ambar", item.inWarehouse!.definition.toString()),
+                _infoRowForWorkplace("Ambar", item.inWarehouse!.definition.toString()),
               ],
             ),
           ),
@@ -339,15 +304,11 @@ class _WarehouseTransferItemDetailState
 
   AppBar _appBar() {
     return AppBar(
-      iconTheme: IconThemeData(
-          color: Colors.deepOrange[700], size: 32 //change your color here
+      iconTheme: IconThemeData(color: Colors.deepOrange[700], size: 32 //change your color here
           ),
       title: Text(
         "Ambar Transfer Detayı",
-        style: TextStyle(
-            color: Colors.deepOrange[700],
-            fontWeight: FontWeight.bold,
-            fontSize: 20),
+        style: TextStyle(color: Colors.deepOrange[700], fontWeight: FontWeight.bold, fontSize: 20),
         textAlign: TextAlign.center,
       ),
       centerTitle: true,

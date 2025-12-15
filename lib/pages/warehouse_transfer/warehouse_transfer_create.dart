@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:gns_warehouse/constants/customer_address_type.dart';
 import 'package:gns_warehouse/constants/system_settings.dart';
 import 'package:gns_warehouse/models/new_api/customer_addresses_response.dart';
 import 'package:gns_warehouse/models/new_api/doc_number_get_fiche_number.dart';
@@ -29,12 +30,10 @@ class WarehouseTransferCreatePage extends StatefulWidget {
   const WarehouseTransferCreatePage({super.key});
 
   @override
-  State<WarehouseTransferCreatePage> createState() =>
-      _WarehouseTransferCreatePageState();
+  State<WarehouseTransferCreatePage> createState() => _WarehouseTransferCreatePageState();
 }
 
-class _WarehouseTransferCreatePageState
-    extends State<WarehouseTransferCreatePage> {
+class _WarehouseTransferCreatePageState extends State<WarehouseTransferCreatePage> {
   String ficheNo = "";
   late ApiRepository apiRepository;
   late NewCustomerListResponse? customerResponse;
@@ -84,8 +83,7 @@ class _WarehouseTransferCreatePageState
   String transferTypeName = "";
   bool isTransferTypeSelectable = false;
   int transferTypeId = 0;
-  List<TransferTypeItem> transferTypeItem =
-      GNSSystemSettingsUtils.transferTypeItemList;
+  List<TransferTypeItem> transferTypeItem = GNSSystemSettingsUtils.transferTypeItemList;
 
   bool isCustomerIdEmpty = false;
   bool isCustomerAddressIdEmpty = false;
@@ -164,9 +162,7 @@ class _WarehouseTransferCreatePageState
             inWarehouseId: inTransferInfo.warehouseId,
             inWarehouseName: inTransferInfo.warehouseName,
             unitId: response.products?.items?[0].unit?.unitId ?? guidEmpty,
-            unitConversionId: response.products?.items?[0].unit?.conversions?[0]
-                    .unitConversionId ??
-                guidEmpty,
+            unitConversionId: response.products?.items?[0].unit?.conversions?[0].unitConversionId ?? guidEmpty,
             qty: 1,
             productLocationRelationId: null,
             erpId: response.products?.items?[0].erpId ?? "0",
@@ -175,8 +171,7 @@ class _WarehouseTransferCreatePageState
             projectName: projectName,
           );
           transferProductList.add(
-              WarehouseTransferProductDetailAndScannedNumber(
-                  response: response, bodyItem: newItem, scannedNumber: 1));
+              WarehouseTransferProductDetailAndScannedNumber(response: response, bodyItem: newItem, scannedNumber: 1));
           _showLoadingScreen(false, "Barkodla İlgili Ürün Aranıyor");
           setState(() {});
         } else {
@@ -191,9 +186,8 @@ class _WarehouseTransferCreatePageState
   }
 
   Future<void> _getWaybillTypeSelection() async {
-    String waybillType = await ServiceSharedPreferences.getSharedString(
-            GNSSystemSettingsUtils.WaybillTypeSelection) ??
-        "";
+    String waybillType =
+        await ServiceSharedPreferences.getSharedString(GNSSystemSettingsUtils.WaybillTypeSelection) ?? "";
 
     switch (waybillType) {
       case "0":
@@ -242,15 +236,15 @@ class _WarehouseTransferCreatePageState
                               SizedBox(
                                 height: spaceBetweenInputs,
                               ),
-                              GNSTextField(
-                                label: "Fiş No",
-                                onValueChanged: (value) {
-                                  ficheNo = value.toString();
-                                },
-                              ),
-                              SizedBox(
-                                height: spaceBetweenInputs,
-                              ),
+                              // GNSTextField(
+                              //   label: "Fiş No",
+                              //   onValueChanged: (value) {
+                              //     ficheNo = value.toString();
+                              //   },
+                              // ),
+                              // SizedBox(
+                              //   height: spaceBetweenInputs,
+                              // ),
                               // ElevatedButton(
                               //     onPressed: () {
                               //       _updateUIForEmptyAreas();
@@ -258,10 +252,10 @@ class _WarehouseTransferCreatePageState
                               //     },
                               //     child: Text("asdad")),
                               GNSSelectCustomerAndAddress(
+                                addressType: CustomerAddressType.shippingAddress,
                                 response: customerResponse!,
                                 isErrorActiveForCustomer: isCustomerIdEmpty,
-                                isErrorActiveForCustomerAddress:
-                                    isCustomerAddressIdEmpty,
+                                isErrorActiveForCustomerAddress: isCustomerAddressIdEmpty,
                                 onValueChanged: (value) {
                                   customerInfo = value;
                                 },
@@ -277,8 +271,7 @@ class _WarehouseTransferCreatePageState
                               SizedBox(
                                 height: spaceBetweenInputs,
                               ),
-                              _selectWaybillType(transferTypeName,
-                                  selectWaybillTypeFromBottom),
+                              _selectWaybillType(transferTypeName, selectWaybillTypeFromBottom),
                               SizedBox(
                                 height: spaceBetweenInputs,
                               ),
@@ -322,20 +315,14 @@ class _WarehouseTransferCreatePageState
                                       child: GNSSelectWarehouseList(
                                         title: "Çıkış",
                                         response: workplaceResponse!,
-                                        isErrorActiveForWorkplace:
-                                            isWorkplaceIdEmptyForOut,
-                                        isErrorActiveForDepartment:
-                                            isDepartmentIdEmptyForOut,
-                                        isErrorActiveForWarehouse:
-                                            isWarehouseIdEmptyForOut,
+                                        isErrorActiveForWorkplace: isWorkplaceIdEmptyForOut,
+                                        isErrorActiveForDepartment: isDepartmentIdEmptyForOut,
+                                        isErrorActiveForWarehouse: isWarehouseIdEmptyForOut,
                                         onValueChanged: (value) {
                                           outTransferInfo = value;
-                                          transferProductList
-                                              .forEach((element) {
-                                            element.bodyItem.outWarehouseId =
-                                                outTransferInfo.warehouseId;
-                                            element.bodyItem.outWarehouseName =
-                                                outTransferInfo.warehouseName;
+                                          transferProductList.forEach((element) {
+                                            element.bodyItem.outWarehouseId = outTransferInfo.warehouseId;
+                                            element.bodyItem.outWarehouseName = outTransferInfo.warehouseName;
                                           });
                                           setState(() {});
                                         },
@@ -353,20 +340,14 @@ class _WarehouseTransferCreatePageState
                                       child: GNSSelectWarehouseList(
                                         title: "Giriş",
                                         response: workplaceResponse!,
-                                        isErrorActiveForWorkplace:
-                                            isWorkplaceIdEmptyForIn,
-                                        isErrorActiveForDepartment:
-                                            isDepartmentIdEmptyForIn,
-                                        isErrorActiveForWarehouse:
-                                            isWarehouseIdEmptyForIn,
+                                        isErrorActiveForWorkplace: isWorkplaceIdEmptyForIn,
+                                        isErrorActiveForDepartment: isDepartmentIdEmptyForIn,
+                                        isErrorActiveForWarehouse: isWarehouseIdEmptyForIn,
                                         onValueChanged: (value) {
                                           inTransferInfo = value;
-                                          transferProductList
-                                              .forEach((element) {
-                                            element.bodyItem.inWarehouseId =
-                                                inTransferInfo.warehouseId;
-                                            element.bodyItem.inWarehouseName =
-                                                inTransferInfo.warehouseName;
+                                          transferProductList.forEach((element) {
+                                            element.bodyItem.inWarehouseId = inTransferInfo.warehouseId;
+                                            element.bodyItem.inWarehouseName = inTransferInfo.warehouseName;
                                           });
                                           setState(() {});
                                         },
@@ -380,8 +361,7 @@ class _WarehouseTransferCreatePageState
                               ),
                               GNSTextFormField(
                                 label: "Not",
-                                maxLengthEnforcement:
-                                    MaxLengthEnforcement.enforced,
+                                maxLengthEnforcement: MaxLengthEnforcement.enforced,
                                 maxLength: 200,
                                 onValueChanged: (value) {
                                   description = value!;
@@ -396,12 +376,9 @@ class _WarehouseTransferCreatePageState
                       onBarcodeChanged: (val) async {
                         bool isMatchAnyBarcode = false;
                         transferProductList.forEach((element) {
-                          if (element.response.products?.items?[0].barcode
-                                  .toString() ==
-                              val) {
+                          if (element.response.products?.items?[0].barcode.toString() == val) {
                             isMatchAnyBarcode = true;
-                            element.bodyItem.qty =
-                                (element.bodyItem.qty ?? 0) + scannedTimes;
+                            element.bodyItem.qty = (element.bodyItem.qty ?? 0) + scannedTimes;
                             setState(() {});
                           }
                         });
@@ -441,9 +418,7 @@ class _WarehouseTransferCreatePageState
                                 shrinkWrap: true,
                                 itemCount: transferProductList.length,
                                 itemBuilder: (context, index) {
-                                  return _card(
-                                      transferProductList[index].bodyItem,
-                                      index);
+                                  return _card(transferProductList[index].bodyItem, index);
                                 },
                               )
                             ],
@@ -452,8 +427,7 @@ class _WarehouseTransferCreatePageState
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                          top: 5, left: 5, right: 5, bottom: 5),
+                      padding: const EdgeInsets.only(top: 5, left: 5, right: 5, bottom: 5),
                       child: Center(
                         child: SizedBox(
                           width: double.infinity,
@@ -462,32 +436,25 @@ class _WarehouseTransferCreatePageState
                             elevation: 0,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(10),
-                              splashColor:
-                                  const Color.fromARGB(255, 255, 223, 187),
+                              splashColor: const Color.fromARGB(255, 255, 223, 187),
                               onTap: () async {
                                 _updateUIForEmptyAreas();
                                 if (_isThereEmptyValue()) {
-                                  _showDialogMessage(context, "HATA !",
-                                      "Boş alanları lütfen doldurunuz.");
+                                  _showDialogMessage(context, "HATA !", "Boş alanları lütfen doldurunuz.");
                                 } else {
                                   _showLoadingScreen(true, "Yükleniyor...");
                                   try {
-                                    bool isTransferCreated = await apiRepository
-                                        .createWarehouseTransfer(
-                                            await _createTransferBody());
+                                    bool isTransferCreated =
+                                        await apiRepository.createWarehouseTransfer(await _createTransferBody());
                                     if (isTransferCreated) {
-                                      _showLoadingScreen(
-                                          false, "Yükleniyor...");
+                                      _showLoadingScreen(false, "Yükleniyor...");
                                       isFicheCreated = true;
                                       // ignore: use_build_context_synchronously
-                                      _showDialogMessage(context, "Başarılı",
-                                          "Transfer fişi oluşturuldu");
+                                      _showDialogMessage(context, "Başarılı", "Transfer fişi oluşturuldu");
                                     } else {
-                                      _showLoadingScreen(
-                                          false, "Yükleniyor...");
+                                      _showLoadingScreen(false, "Yükleniyor...");
                                       // ignore: use_build_context_synchronously
-                                      _showDialogMessage(context, "Başarısız",
-                                          "Transfer fişi oluşturulamadı !");
+                                      _showDialogMessage(context, "Başarısız", "Transfer fişi oluşturulamadı !");
                                     }
                                   } catch (e) {
                                     _showLoadingScreen(false, "Yükleniyor...");
@@ -508,10 +475,8 @@ class _WarehouseTransferCreatePageState
                                       child: Text(
                                         "Ambar Transfer Oluştur",
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700),
+                                        style:
+                                            TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.w700),
                                       ),
                                     ),
                                   )),
@@ -705,35 +670,29 @@ class _WarehouseTransferCreatePageState
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "İrsaliye Tipi",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: transferTypeItem.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(
-                              transferTypeItem[index].type, () {
-                            transferTypeName = transferTypeItem[index].type;
-                            transferTypeId = transferTypeItem[index].id;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: transferTypeItem.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(transferTypeItem[index].type, () {
+                        transferTypeName = transferTypeItem[index].type;
+                        transferTypeId = transferTypeItem[index].id;
 
-                            Navigator.pop(context);
-                            setState(() {});
-                          });
-                        },
-                      )
-                    ]),
+                        Navigator.pop(context);
+                        setState(() {});
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -786,17 +745,11 @@ class _WarehouseTransferCreatePageState
             contentPadding: const EdgeInsets.only(right: 15, left: 15),
             leading: Text(
               (index + 1 < 10) ? "0${index + 1}" : "${index + 1}",
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.grey[700]),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
             ),
             trailing: Text(
               item.qty.toString(),
-              style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple),
+              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.purple),
             ),
             title: Text(
               item.description.toString(),
@@ -808,21 +761,14 @@ class _WarehouseTransferCreatePageState
                 color: Color(0xff727272),
               ),
             ),
-            subtitle:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
                 "Çıkış Ambarı: ${item.outWarehouseName.toString()}",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.grey[700]),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
               ),
               Text(
                 "Giriş Ambarı: ${item.inWarehouseName.toString()}",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.grey[700]),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
               )
             ]),
           ),
@@ -833,15 +779,11 @@ class _WarehouseTransferCreatePageState
 
   AppBar _appBar() {
     return AppBar(
-      iconTheme: IconThemeData(
-          color: Colors.deepOrange[700], size: 32 //change your color here
+      iconTheme: IconThemeData(color: Colors.deepOrange[700], size: 32 //change your color here
           ),
       title: Text(
         "Ambar Transfer Fişi Oluştur",
-        style: TextStyle(
-            color: Colors.deepOrange[700],
-            fontWeight: FontWeight.bold,
-            fontSize: 20),
+        style: TextStyle(color: Colors.deepOrange[700], fontWeight: FontWeight.bold, fontSize: 20),
         textAlign: TextAlign.center,
       ),
       centerTitle: true,
@@ -854,16 +796,14 @@ class _WarehouseTransferCreatePageState
     );
   }
 
-  Future<dynamic> showDialogForAddNewProduct(
-      BuildContext context, String content) {
+  Future<dynamic> showDialogForAddNewProduct(BuildContext context, String content) {
     return showDialog(
       context: context,
       builder: (context) => PopScope(
         canPop: false,
         child: AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+              borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
             ),
             title: const Text("Ürün Ekle"),
             contentPadding: const EdgeInsets.all(10.0),
@@ -886,16 +826,15 @@ class _WarehouseTransferCreatePageState
   }
 
 //asdasd
-  Future<dynamic> _showDialogForUpdateProduct(BuildContext context,
-      String content, WarehouseTransferLocalItems oldItem, int index) {
+  Future<dynamic> _showDialogForUpdateProduct(
+      BuildContext context, String content, WarehouseTransferLocalItems oldItem, int index) {
     return showDialog(
       context: context,
       builder: (context) => PopScope(
         canPop: true,
         child: AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+              borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
             ),
             title: const Text("Ürün Güncelle"),
             contentPadding: const EdgeInsets.all(10.0),
@@ -919,8 +858,7 @@ class _WarehouseTransferCreatePageState
       context: buildContext,
       builder: (buildContext) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -996,8 +934,7 @@ class _WarehouseTransferCreatePageState
   }
 
   Future<String> _getDocNumberFicheNumber() async {
-    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(
-        apiRepository.employeeUid, "11");
+    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(apiRepository.employeeUid, "11");
 
     return getFicheNumberResponse?.docnumber?.lastNum ?? "";
   }
@@ -1006,8 +943,7 @@ class _WarehouseTransferCreatePageState
     return WarehouseTransferCreateBody(
       customerId: customerInfo.customerId,
       ficheNo: ficheNo.isEmpty ? await _getDocNumberFicheNumber() : ficheNo,
-      ficheDate:
-          DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(ficheDate.toUtc()),
+      ficheDate: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(ficheDate.toUtc()),
       ficheTime: DateFormat('HH:mm').format(ficheDate),
       docNo: "",
       outWorkplaceId: outTransferInfo.workplaceId,

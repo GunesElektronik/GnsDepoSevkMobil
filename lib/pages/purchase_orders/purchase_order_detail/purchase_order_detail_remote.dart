@@ -30,18 +30,14 @@ import 'package:intl/intl.dart';
 
 class PurchaseOrderDetailRemote extends StatefulWidget {
   const PurchaseOrderDetailRemote(
-      {super.key,
-      required this.purchaseOrderId,
-      required this.item,
-      required this.onValueChanged});
+      {super.key, required this.purchaseOrderId, required this.item, required this.onValueChanged});
 
   final String purchaseOrderId;
   final PurchaseOrderSummaryItem item;
   final ValueChanged<PurchaseOrderSummaryItem> onValueChanged;
 
   @override
-  State<PurchaseOrderDetailRemote> createState() =>
-      _PurchaseOrderDetailRemoteState();
+  State<PurchaseOrderDetailRemote> createState() => _PurchaseOrderDetailRemoteState();
 }
 
 class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
@@ -90,9 +86,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
 
   String waybillTypeName = "";
   bool isWaybillTypeSelectable = false;
-  int waybillTypeId = 0;
-  List<WaybillTypeItem> waybillTypeItem =
-      GNSSystemSettingsUtils.waybillTypeItemList;
+  int waybillTypeId = 1;
+  List<WaybillTypeItem> waybillTypeItem = GNSSystemSettingsUtils.waybillTypeItemList;
 
   int orderStatusId = -1;
   String orderStatusName = "";
@@ -115,26 +110,20 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     isThisInMultiOrder = false;
     apiRepository = await ApiRepository.create(context);
     try {
-      isAuthPurchaseCancelAssign = await ServiceSharedPreferences.getSharedBool(
-              UserSpecialSettingsUtils.isAuthPurchaseCancelAssign) ??
-          false;
-      isAuthChangeOrderStatus = await ServiceSharedPreferences.getSharedBool(
-              UserSpecialSettingsUtils.isAuthPurchaseChangeOrderStatus) ??
-          false;
-      isPriceVisible = await ServiceSharedPreferences.getSharedBool(
-              SharedPreferencesKey.isPriceVisible) ??
-          false;
-      isOrderAssignAutoDrop = await ServiceSharedPreferences.getSharedBool(
-              GNSSystemSettingsUtils.OrderAssignAutoDrop) ??
-          false;
+      isAuthPurchaseCancelAssign =
+          await ServiceSharedPreferences.getSharedBool(UserSpecialSettingsUtils.isAuthPurchaseCancelAssign) ?? false;
+      isAuthChangeOrderStatus =
+          await ServiceSharedPreferences.getSharedBool(UserSpecialSettingsUtils.isAuthPurchaseChangeOrderStatus) ??
+              false;
+      isPriceVisible = await ServiceSharedPreferences.getSharedBool(SharedPreferencesKey.isPriceVisible) ?? false;
+      isOrderAssignAutoDrop =
+          await ServiceSharedPreferences.getSharedBool(GNSSystemSettingsUtils.OrderAssignAutoDrop) ?? false;
     } catch (e) {}
     await _getWaybillTypeSelection();
-    isThisInMultiOrder = await _dbHelper
-        .isThereAnyItemBasedOrderIdInMultiPurchaseOrder(widget.purchaseOrderId);
+    isThisInMultiOrder = await _dbHelper.isThereAnyItemBasedOrderIdInMultiPurchaseOrder(widget.purchaseOrderId);
     _getUserSpecialWarehouseSettings();
     try {
-      response =
-          await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
+      response = await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
     } catch (e) {
       isRequestSuccess = false;
     }
@@ -162,8 +151,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
             productName: element.product!.definition,
             productBarcode: element.product!.barcode,
             warehouse: element.warehouseName,
-            serilotType: _transformToIntForProductTracking(
-                element.product!.productTrackingMethod!),
+            serilotType: _transformToIntForProductTracking(element.product!.productTrackingMethod!),
             scannedQty: element.shippedQty!.toInt()!,
             shippedQty: 0,
             qty: element.qty!.toInt()),
@@ -194,9 +182,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   }
 
   Future<void> _getWaybillTypeSelection() async {
-    String waybillType = await ServiceSharedPreferences.getSharedString(
-            GNSSystemSettingsUtils.WaybillTypeSelection) ??
-        "";
+    String waybillType =
+        await ServiceSharedPreferences.getSharedString(GNSSystemSettingsUtils.WaybillTypeSelection) ?? "";
 
     switch (waybillType) {
       case "0":
@@ -228,23 +215,19 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     riskLimitResponse = await apiRepository.getCustomerRiskLimit(customerId);
 
     if (riskLimitResponse.customerRiskLimit != null) {
-      if (response.order!.grossTotal! >
-          riskLimitResponse.customerRiskLimit!.canUseRiskLimit!) {
+      if (response.order!.grossTotal! > riskLimitResponse.customerRiskLimit!.canUseRiskLimit!) {
         isCustomerInRiskLimit = true;
-        differenceWithRiskLimit = response.order!.grossTotal! -
-            riskLimitResponse.customerRiskLimit!.canUseRiskLimit!;
+        differenceWithRiskLimit = response.order!.grossTotal! - riskLimitResponse.customerRiskLimit!.canUseRiskLimit!;
       }
     }
   }
 
   Future<void> _getUserSpecialWarehouseSettings() async {
-    String userSpecialSetting = await ServiceSharedPreferences.getSharedString(
-            UserSpecialSettingsUtils.userWarehouseAuthIn) ??
-        "";
+    String userSpecialSetting =
+        await ServiceSharedPreferences.getSharedString(UserSpecialSettingsUtils.userWarehouseAuthIn) ?? "";
 
-    userDefaultWarehouseIn = await ServiceSharedPreferences.getSharedString(
-            UserSpecialSettingsUtils.userDefaultWarehouseIn) ??
-        "";
+    userDefaultWarehouseIn =
+        await ServiceSharedPreferences.getSharedString(UserSpecialSettingsUtils.userDefaultWarehouseIn) ?? "";
 
     if (userSpecialSetting.isNotEmpty) {
       List<dynamic> decodedValue = jsonDecode(userSpecialSetting);
@@ -268,18 +251,15 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   }
 
   void _savePurchaseOrderSummaryOnLocal() async {
-    PurchaseOrderSummaryLocal? item =
-        await _dbHelper.getPurchaseOrderHeaderById(widget.purchaseOrderId);
+    PurchaseOrderSummaryLocal? item = await _dbHelper.getPurchaseOrderHeaderById(widget.purchaseOrderId);
 
     if (item == null) {
-      await _dbHelper
-          .addPurchaseOrderSummary(_updateCurrentPurchaseOrderSummaryItem());
+      await _dbHelper.addPurchaseOrderSummary(_updateCurrentPurchaseOrderSummaryItem());
     }
   }
 
   void _deletePurchaseOrderSummaryOnLocal() async {
-    PurchaseOrderSummaryLocal? item =
-        await _dbHelper.getPurchaseOrderHeaderById(widget.purchaseOrderId);
+    PurchaseOrderSummaryLocal? item = await _dbHelper.getPurchaseOrderHeaderById(widget.purchaseOrderId);
 
     if (item != null) {
       await _dbHelper.removePurchaseOrderSummary(widget.purchaseOrderId);
@@ -287,8 +267,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   }
 
   void _getLocalOrderDetailItemList() async {
-    var results =
-        await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
+    var results = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
     orderDetailItemList = results;
 
     if (orderDetailItemList!.isEmpty) {
@@ -315,16 +294,14 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       //   ));
       // });
 
-      var results = await _dbHelper
-          .getPurchaseOrderDetailItemList(widget.purchaseOrderId);
+      var results = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
       orderDetailItemList = results;
     } else {
       bool isThereChange1 = await _checkForRowItemsAddOrDeleteFromLogo();
       bool isThereChange2 = await _checkForRowItemsQtyChangedFromLogo();
 
       if (isThereChange1 == true || isThereChange2 == true) {
-        var results = await _dbHelper
-            .getPurchaseOrderDetailItemList(widget.purchaseOrderId);
+        var results = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
         orderDetailItemList = results;
       }
     }
@@ -338,14 +315,10 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       var remoteElement = response.order!.orderItems![i];
       for (int j = 0; j < orderDetailItemList!.length; j++) {
         var localElement = orderDetailItemList![j];
-        if (localElement.qty! != remoteElement.qty!.toInt() &&
-            localElement.orderItemId == remoteElement.orderItemId) {
+        if (localElement.qty! != remoteElement.qty!.toInt() && localElement.orderItemId == remoteElement.orderItemId) {
           isThereAnyChange = true;
           await _dbHelper.updatePurchaseOrderDetailItemQty(
-              widget.purchaseOrderId,
-              localElement.orderItemId!,
-              localElement.warehouseId!,
-              remoteElement.qty!.toInt());
+              widget.purchaseOrderId, localElement.orderItemId!, localElement.warehouseId!, remoteElement.qty!.toInt());
         }
       }
     }
@@ -354,10 +327,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   }
 
   Future<bool> _checkForRowItemsAddOrDeleteFromLogo() async {
-    List<OrderItems> addedItems =
-        findAddedItems(orderDetailItemList!, response.order!.orderItems!);
-    List<PurchaseOrderDetailItemDB> deletedItems =
-        findDeletedItems(orderDetailItemList!, response.order!.orderItems!);
+    List<OrderItems> addedItems = findAddedItems(orderDetailItemList!, response.order!.orderItems!);
+    List<PurchaseOrderDetailItemDB> deletedItems = findDeletedItems(orderDetailItemList!, response.order!.orderItems!);
 
     for (OrderItems item in addedItems) {
       await _dbHelper.addPurchaseOrderDetailItem(PurchaseOrderDetailItemDB(
@@ -372,17 +343,16 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
         warehouse: item.warehouseName,
         isProductLocatin: item.product!.isProductLocatin ?? false,
         stockLocationName: "",
-        serilotType: _transformToIntForProductTracking(
-            item.product!.productTrackingMethod!),
+        serilotType: _transformToIntForProductTracking(item.product!.productTrackingMethod!),
         scannedQty: item.shippedQty!.toInt(),
         qty: item.qty!.toInt(),
         shippedQty: item.shippedQty!.toInt(),
+        lineNr: item.lineNr!.toInt(),
       ));
     }
 
     for (PurchaseOrderDetailItemDB item in deletedItems) {
-      await _dbHelper.deletePurchaseOrderDetailItem(
-          item.purchaseOrderId!, item.orderItemId!, item.warehouseId!);
+      await _dbHelper.deletePurchaseOrderDetailItem(item.purchaseOrderId!, item.orderItemId!, item.warehouseId!);
     }
 
     if (addedItems.length > 0 || deletedItems.length > 0) {
@@ -403,8 +373,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
 
   bool _checkForWaybillItemsNotEmpty() {
     for (int i = 0; i < orderDetailItemList!.length; i++) {
-      if (orderDetailItemList![i].scannedQty! >
-          orderDetailItemList![i].shippedQty!) {
+      if (orderDetailItemList![i].scannedQty! > orderDetailItemList![i].shippedQty!) {
         return true;
       }
     }
@@ -412,8 +381,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     return false;
   }
 
-  List<PurchaseOrderDetailItemDB> findDeletedItems(
-      List<PurchaseOrderDetailItemDB> oldList, List<OrderItems> newList) {
+  List<PurchaseOrderDetailItemDB> findDeletedItems(List<PurchaseOrderDetailItemDB> oldList, List<OrderItems> newList) {
     List<PurchaseOrderDetailItemDB> deletedItems = [];
     for (PurchaseOrderDetailItemDB item in oldList) {
       if (!newList.any((newItem) => newItem.orderItemId == item.orderItemId)) {
@@ -423,8 +391,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     return deletedItems;
   }
 
-  List<OrderItems> findAddedItems(
-      List<PurchaseOrderDetailItemDB> oldList, List<OrderItems> newList) {
+  List<OrderItems> findAddedItems(List<PurchaseOrderDetailItemDB> oldList, List<OrderItems> newList) {
     List<OrderItems> addedItems = [];
     for (OrderItems item in newList) {
       if (!oldList.any((oldItem) => oldItem.orderItemId == item.orderItemId)) {
@@ -436,8 +403,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
 
   Future<void> _saveProductAndOrderItems() async {
     for (int i = 0; i < response.order!.orderItems!.length; i++) {
-      await _getProductBarcodes(
-          response.order!.orderItems![i].product!.productId!);
+      await _getProductBarcodes(response.order!.orderItems![i].product!.productId!);
       await _dbHelper.addPurchaseOrderDetailItem(PurchaseOrderDetailItemDB(
         purchaseOrderId: widget.purchaseOrderId,
         orderItemId: response.order!.orderItems![i].orderItemId,
@@ -448,28 +414,25 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
         productName: response.order!.orderItems![i].product?.definition ?? "",
         productBarcode: response.order!.orderItems![i].product!.barcode,
         warehouse: response.order!.orderItems![i].warehouseName,
-        isProductLocatin:
-            response.order!.orderItems![i].product!.isProductLocatin ?? false,
+        isProductLocatin: response.order!.orderItems![i].product!.isProductLocatin ?? false,
         stockLocationName: "",
-        serilotType: _transformToIntForProductTracking(
-            response.order!.orderItems![i].product!.productTrackingMethod!),
+        serilotType: _transformToIntForProductTracking(response.order!.orderItems![i].product!.productTrackingMethod!),
         scannedQty: response.order!.orderItems![i].shippedQty!.toInt(),
         qty: response.order!.orderItems![i].qty!.toInt(),
         shippedQty: response.order!.orderItems![i].shippedQty!.toInt(),
+        lineNr: response.order!.orderItems![i].lineNr!.toInt(),
       ));
     }
   }
 
   Future<List<String>> _checkStock() async {
     List<String> insufficientStockProducts = [];
-    var result = await apiRepository
-        .getStockByProductIdList(_createStockByProductList());
+    var result = await apiRepository.getStockByProductIdList(_createStockByProductList());
     result!.stocks!.forEach((remoteElement) {
       orderDetailItemList!.forEach((localElement) {
         if (remoteElement.productId == localElement.productId &&
             remoteElement.warehouse!.warehouseId == localElement.warehouseId) {
-          if (remoteElement.onHandStock! <
-              localElement.scannedQty! - localElement.shippedQty!) {
+          if (remoteElement.onHandStock! < localElement.scannedQty! - localElement.shippedQty!) {
             insufficientStockProducts.add(localElement.productName!);
           }
         }
@@ -500,8 +463,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     bool isSuccess = false;
     _showLoadingScreen(true, "Yükleniyor ...");
 
-    var orderItemList =
-        await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
+    var orderItemList = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
 
     //print("productId: ${orderItemList![0].productId}");
 
@@ -534,8 +496,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     //   _showLoadingScreen(false, "Yükleniyor ...");
     // }
 
-    isSuccess = await apiRepository.setPurchaseOrderAssingStatus(
-        false, apiRepository.employeeUid, widget.purchaseOrderId);
+    isSuccess =
+        await apiRepository.setPurchaseOrderAssingStatus(false, apiRepository.employeeUid, widget.purchaseOrderId);
     _showLoadingScreen(false, "Yükleniyor ...");
 
     //&& isUpdate yorum aldım
@@ -544,12 +506,10 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       print("işlem başarılı");
       _showLoadingScreen(true, "Veriler Güncelleniyor ...");
       _deletePurchaseOrderSummaryOnLocal();
-      response =
-          await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
+      response = await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
       await _dbHelper.clearAllPurchaseOrderDetailItems(widget.purchaseOrderId);
 
-      await _dbHelper
-          .removePurchaseOrderDetailScannedItems(response.order!.ficheNo!);
+      await _dbHelper.removePurchaseOrderDetailScannedItems(response.order!.ficheNo!);
       await _dbHelper.clearAllProductBarcodes(widget.purchaseOrderId);
 
       _showLoadingScreen(false, "Veriler Güncelleniyor ...");
@@ -584,15 +544,12 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   Future<void> _changePurchaseOrderStatusRequest() async {
     _showLoadingScreen(true, "Yükleniyor");
     try {
-      await apiRepository.setPurchaseOrderStatus(
-          widget.purchaseOrderId, orderStatusId);
-      await _dbHelper.updateOrderStatusForPurchaseOrderHeader(
-          orderStatusName, widget.purchaseOrderId);
+      await apiRepository.setPurchaseOrderStatus(widget.purchaseOrderId, orderStatusId);
+      await _dbHelper.updateOrderStatusForPurchaseOrderHeader(orderStatusName, widget.purchaseOrderId);
       _showLoadingScreen(false, "Yükleniyor");
     } catch (e) {
       _showLoadingScreen(false, "Yükleniyor");
-      _showDialogMessage("HATA !",
-          "Sipariş durumu değiştilirken hata oluştu. \n ${e.toString()}");
+      _showDialogMessage("HATA !", "Sipariş durumu değiştilirken hata oluştu. \n ${e.toString()}");
     }
   }
 
@@ -600,8 +557,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     bool isUpdate = false;
     bool isSuccess = false;
 
-    var orderItemList =
-        await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
+    var orderItemList = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
 
     //print("productId: ${orderItemList![0].productId}");
 
@@ -616,8 +572,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
               ))
           .toList();
       try {
-        isUpdate = await apiRepository.updatePurchaseOrderItems(
-            widget.purchaseOrderId, customerId, orderItemsList);
+        isUpdate = await apiRepository.updatePurchaseOrderItems(widget.purchaseOrderId, customerId, orderItemsList);
       } catch (e) {
         print("İşlem hatası: $e");
         // _showLoadingScreen(false, "Yükleniyor ...");
@@ -630,8 +585,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
 
     if (isOrderAssignAutoDrop) {
       if (isUpdate) {
-        isSuccess = await apiRepository.setPurchaseOrderAssingStatus(
-            false, apiRepository.employeeUid, widget.purchaseOrderId);
+        isSuccess =
+            await apiRepository.setPurchaseOrderAssingStatus(false, apiRepository.employeeUid, widget.purchaseOrderId);
         // _showLoadingScreen(false, "Yükleniyor ...");
       }
     }
@@ -640,12 +595,10 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       print("işlem başarılı");
       // _showLoadingScreen(true, "Veriler Güncelleniyor ...");
       _deletePurchaseOrderSummaryOnLocal();
-      response =
-          await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
+      response = await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
       await _dbHelper.clearAllPurchaseOrderDetailItems(widget.purchaseOrderId);
 
-      await _dbHelper
-          .removePurchaseOrderDetailScannedItems(response.order!.ficheNo!);
+      await _dbHelper.removePurchaseOrderDetailScannedItems(response.order!.ficheNo!);
       await _dbHelper.clearAllProductBarcodes(widget.purchaseOrderId);
 
       // _showLoadingScreen(false, "Veriler Güncelleniyor ...");
@@ -660,8 +613,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       //db kaydet işlemleri
     } else if (isUpdate && !isSuccess) {
       print("işlem başarılı");
-      response =
-          await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
+      response = await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
 
       for (int j = 0; j < orderDetailItemList!.length; j++) {
         var localElement = orderDetailItemList![j];
@@ -674,10 +626,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
         );
       }
 
-      await _dbHelper
-          .removePurchaseOrderDetailScannedItems(response.order!.ficheNo!);
-      var results = await _dbHelper
-          .getPurchaseOrderDetailItemList(widget.purchaseOrderId);
+      await _dbHelper.removePurchaseOrderDetailScannedItems(response.order!.ficheNo!);
+      var results = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
       orderDetailItemList = results;
       // _showLoadingScreen(false, "Veriler Güncelleniyor ...");
 
@@ -698,17 +648,13 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     result.products!.unit!.conversions!.forEach((element) async {
       element.barcodes!.forEach((barcode) async {
         await _dbHelper.addProductBarcode(_createProductBarcodeItem(
-            productId,
-            barcode.barcode!,
-            element.code!,
-            element.convParam1!,
-            element.convParam2!));
+            productId, barcode.barcode!, element.code!, element.convParam1!, element.convParam2!));
       });
     });
   }
 
-  ProductBarcodesItemLocal _createProductBarcodeItem(String productId,
-      String barcode, String code, int convParam1, int convParam2) {
+  ProductBarcodesItemLocal _createProductBarcodeItem(
+      String productId, String barcode, String code, int convParam1, int convParam2) {
     return ProductBarcodesItemLocal(
       recid: 0,
       orderId: widget.purchaseOrderId,
@@ -725,8 +671,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     //await Future.delayed(Duration(seconds: 3));
     //bool isSuccess = true;
 
-    bool isSuccess = await apiRepository.setPurchaseOrderAssingStatus(
-        true, apiRepository.employeeUid, widget.purchaseOrderId);
+    bool isSuccess =
+        await apiRepository.setPurchaseOrderAssingStatus(true, apiRepository.employeeUid, widget.purchaseOrderId);
     _showLoadingScreen(false, "Yükleniyor ...");
 
     //bool deneme = false;
@@ -734,8 +680,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       print("işlem başarılı");
       _showLoadingScreen(true, "Veriler Güncelleniyor ...");
 
-      response =
-          await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
+      response = await apiRepository.getPurchaseOrderDetail(widget.purchaseOrderId);
       await _dbHelper.clearAllPurchaseOrderDetailItems(widget.purchaseOrderId);
 
       await _saveProductAndOrderItems();
@@ -760,8 +705,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       //     shippedQty: element.shippedQty!.toInt(),
       //   ));
       // });
-      var results = await _dbHelper
-          .getPurchaseOrderDetailItemList(widget.purchaseOrderId);
+      var results = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
       orderDetailItemList = results;
 
       _showLoadingScreen(false, "Veriler Güncelleniyor ...");
@@ -783,8 +727,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -811,8 +754,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -850,14 +792,12 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     }
   }
 
-  Future<dynamic> showDialogForAssingOrder(
-      BuildContext context, bool isAssing, String content) {
+  Future<dynamic> showDialogForAssingOrder(BuildContext context, bool isAssing, String content) {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
+          borderRadius: BorderRadius.circular(5.0), // Köşe yuvarlama burada yapılır
         ),
         actions: [
           TextButton(
@@ -936,9 +876,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                     child: Text(
                       "BU SİPARİŞ ÇOKLU SİPARİŞLERDE",
                       style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(255, 255, 152, 35)),
+                          fontSize: 16, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 255, 152, 35)),
                     ),
                   )
                 : const SizedBox(),
@@ -956,8 +894,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                         ? const SizedBox()
                         : IconButton(
                             onPressed: () {
-                              showDialogForAssingOrder(context, true,
-                                  "Siparişi görevlenmeye emin misiniz ?");
+                              showDialogForAssingOrder(context, true, "Siparişi görevlenmeye emin misiniz ?");
                             },
                             icon: const Icon(
                               Icons.download_rounded,
@@ -965,34 +902,25 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                               color: Color(0xffff9700),
                             ),
                           ),
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? const SizedBox(
                             width: 5,
                           )
                         : const SizedBox(),
                     //toplamaya devam et
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? IconButton(
                             onPressed: () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          PurchaseOrderScanPage(
-                                            purchaseOrderDetailItemList:
-                                                orderDetailItemList,
-                                            purchaseOrderId:
-                                                widget.purchaseOrderId,
+                                      builder: (context) => PurchaseOrderScanPage(
+                                            purchaseOrderDetailItemList: orderDetailItemList,
+                                            purchaseOrderId: widget.purchaseOrderId,
                                             // customerId:
                                             //     response.order!.customer!.customerId!,
                                           ))).then((value) async {
-                                var results = await _dbHelper
-                                    .getPurchaseOrderDetailItemList(
-                                        widget.purchaseOrderId);
+                                var results = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
                                 orderDetailItemList = results;
                                 setState(() {});
                               });
@@ -1004,18 +932,13 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                             ),
                           )
                         : const SizedBox(),
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? const SizedBox(
                             width: 5,
                           )
                         : const SizedBox(),
                     //toplamayı tamamla
-                    isAuthPurchaseCancelAssign &&
-                            isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAuthPurchaseCancelAssign && isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? IconButton(
                             onPressed: () {
                               _complateOrder();
@@ -1027,81 +950,57 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                             ),
                           )
                         : const SizedBox(),
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? const SizedBox(
                             width: 5,
                           )
                         : const SizedBox(),
                     //sevk et
-                    isAssing &&
-                            isAssingedPersonIsCurrenUser &&
-                            !isThisInMultiOrder!
+                    isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                         ? IconButton(
                             onPressed: () async {
-                              _showLoadingScreen(
-                                  true, "İrsaliye Oluşturuluyor");
+                              _showLoadingScreen(true, "İrsaliye Oluşturuluyor");
 
                               if (isCustomerInRiskLimit) {
-                                _showLoadingScreen(
-                                    false, "İrsaliye Oluşturuluyor");
-                                _showDialogMessage(
-                                    "Müşteri Risk Limitine Takıldı",
+                                _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
+                                _showDialogMessage("Müşteri Risk Limitine Takıldı",
                                     "İrsaliye oluşturulmadı, sipariş ücreti risk limitinin arasındaki fark: \n $differenceWithRiskLimit");
                               } else {
                                 // await _changeWarehouseBasedOnItems();
-                                bool isWaybillItemNotEmpty =
-                                    _checkForWaybillItemsNotEmpty();
+                                bool isWaybillItemNotEmpty = _checkForWaybillItemsNotEmpty();
                                 if (isWaybillItemNotEmpty) {
-                                  waybillRequestBody =
-                                      await _createWaybillBodyNew();
+                                  waybillRequestBody = await _createWaybillBodyNew();
                                   try {
-                                    bool isDone = await apiRepository
-                                        .createWaybillPurchaseOrder(
-                                            waybillRequestBody!);
+                                    bool isDone = await apiRepository.createWaybillPurchaseOrder(waybillRequestBody!);
 
-                                    bool isAllItemCollected =
-                                        _checkAllItemsCollectedCompletely();
+                                    bool isAllItemCollected = _checkAllItemsCollectedCompletely();
                                     if (isAllItemCollected) {
-                                      orderStatusId =
-                                          EntityConstants.OrderStatusKapandi;
-                                      orderStatusName =
-                                          EntityConstants.getStatusDescription(
-                                              orderStatusId);
+                                      orderStatusId = EntityConstants.OrderStatusKapandi;
+                                      orderStatusName = EntityConstants.getStatusDescription(orderStatusId);
                                       await _changePurchaseOrderStatusRequest();
                                     }
 
                                     if (isDone) {
-                                      bool isCreated =
-                                          await _completeTheOrder2();
+                                      bool isCreated = await _completeTheOrder2();
                                       if (isCreated) {
                                         _deletePurchaseOrderSummaryOnLocal();
-                                        _showLoadingScreen(
-                                            false, "İrsaliye Oluşturuluyor");
+                                        _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                                         // _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
-                                        _showDialogMessage(
-                                            "Başarılı", "İşlem Başarılı");
+                                        _showDialogMessage("Başarılı", "İşlem Başarılı");
                                       } else {
-                                        _showLoadingScreen(
-                                            false, "İrsaliye Oluşturuluyor");
-                                        _showErrorMessage(
-                                            "İrsaliye oluşturuldu, Sipariş bırakılamadı !");
+                                        _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
+                                        _showErrorMessage("İrsaliye oluşturuldu, Sipariş bırakılamadı !");
                                       }
                                     } else {
-                                      _showLoadingScreen(
-                                          false, "İrsaliye Oluşturuluyor");
-                                      _showErrorMessage(
-                                          "İrsaliye Oluşturulamadı !");
+                                      _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
+                                      _showErrorMessage("İrsaliye Oluşturulamadı !");
                                     }
                                   } catch (e) {
-                                    _showLoadingScreen(
-                                        false, "İrsaliye Oluşturuluyor");
+                                    _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                                     GNSShowErrorMessage(context, e.toString());
                                   }
                                 } else {
-                                  _showLoadingScreen(
-                                      false, "İrsaliye Oluşturuluyor");
+                                  _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                                   _showDialogMessage("İrsaliye Oluşturulamadı",
                                       "Okutulmuş ürün tespit edilemediği için irsaliye oluşturulamadı.");
                                 }
@@ -1128,13 +1027,10 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
             const SizedBox(
               height: 5,
             ),
-            _infoRow("Parçalı Sipariş",
-                response.order!.isPartialOrder! ? "Evet" : "Hayır"),
+            _infoRow("Parçalı Sipariş", response.order!.isPartialOrder! ? "Evet" : "Hayır"),
             _divider(),
             _infoRow(
-                "Tarih",
-                DateFormat('dd-MM-yyyy').format(
-                    DateTime.parse(response.order!.ficheDate ?? "01-01-2000"))),
+                "Tarih", DateFormat('dd-MM-yyyy').format(DateTime.parse(response.order!.ficheDate ?? "01-01-2000"))),
             _divider(),
             _infoRow("Müşteri", response.order!.customer!.name ?? ""),
             _divider(),
@@ -1144,13 +1040,11 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
             _divider(),
             _infoRow("Adet", response.order!.orderItems!.length.toString()),
             _divider(),
-            _infoRow("Tutar",
-                isPriceVisible ? response.order!.grossTotal.toString() : "***"),
+            _infoRow("Tutar", isPriceVisible ? response.order!.grossTotal.toString() : "***"),
             _divider(),
             _infoRow("Durum", response.order!.orderStatusName ?? ""),
             _divider(),
-            _infoRow("Operatör",
-                isAssing ? response.order!.assingmetFullname.toString() : ""),
+            _infoRow("Operatör", isAssing ? response.order!.assingmetFullname.toString() : ""),
             _divider(),
 
             isAssingedPersonIsCurrenUser
@@ -1170,10 +1064,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                           const SizedBox(
                             width: 10,
                           ),
-                          Expanded(
-                              flex: 1,
-                              child: _selectWaybillType(waybillTypeName,
-                                  selectWaybillTypeFromBottom)),
+                          Expanded(flex: 1, child: _selectWaybillType(waybillTypeName, selectWaybillTypeFromBottom)),
                         ],
                       ),
                       _divider(),
@@ -1181,17 +1072,14 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                         children: [
                           Expanded(
                             child: _openBottomSheetAndSelectFromTile(
-                                warehouseInitName,
-                                warehouseName,
-                                selectWarehouseReverseForAllItems),
+                                warehouseInitName, warehouseName, selectWarehouseReverseForAllItems),
                           ),
                           const SizedBox(
                             width: 10,
                           ),
                           Expanded(
                             child: isAuthChangeOrderStatus
-                                ? _selectOrderStatusFromList("OrderStatus",
-                                    orderStatusName, showOrderStatusBottomSheet)
+                                ? _selectOrderStatusFromList("OrderStatus", orderStatusName, showOrderStatusBottomSheet)
                                 : const SizedBox(),
                           ),
                         ],
@@ -1223,57 +1111,46 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                     color: const Color(0xfff1f1f1),
                     child: InkWell(
                       onLongPress: () {
-                        selectWarehouseReverseForOnlyOneItem(
-                            orderDetailItemList![index].orderItemId!);
+                        selectWarehouseReverseForOnlyOneItem(orderDetailItemList![index].orderItemId!);
                       },
                       highlightColor: const Color.fromARGB(255, 179, 199, 211),
                       splashColor: Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                       child: ListTile(
-                        contentPadding:
-                            const EdgeInsets.only(right: 15, left: 15),
+                        contentPadding: const EdgeInsets.only(right: 15, left: 15),
                         leading: Text(
                           (index + 1 < 10)
                               ? "0${index + 1} ${serilotType(orderDetailItemList![index].serilotType!)}"
                               : "${index + 1} ${serilotType(orderDetailItemList![index].serilotType!)}",
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[700]),
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal, color: Colors.grey[700]),
                         ),
                         subtitle: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${orderDetailItemList![index].productBarcode}",
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff727272),
-                                      ),
-                                    ),
-                                    Text(
-                                      "${orderDetailItemList![index].productName}",
-                                      maxLines: 1,
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.grey[700]),
-                                    ),
-                                    Text(
-                                      "${orderDetailItemList![index].warehouse}",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.grey[700]),
-                                    ),
-                                  ]),
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text(
+                                  "${orderDetailItemList![index].productBarcode}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xff727272),
+                                  ),
+                                ),
+                                Text(
+                                  "${orderDetailItemList![index].productName}",
+                                  maxLines: 1,
+                                  style:
+                                      TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                                ),
+                                Text(
+                                  "${orderDetailItemList![index].warehouse}",
+                                  style:
+                                      TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey[700]),
+                                ),
+                              ]),
                             ),
                             Column(
                               children: [
@@ -1283,8 +1160,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                                         style: const TextStyle(
                                             fontSize: 22,
                                             fontWeight: FontWeight.bold,
-                                            color: Color.fromARGB(
-                                                255, 39, 150, 43)),
+                                            color: Color.fromARGB(255, 39, 150, 43)),
                                       )
                                     : const SizedBox(),
                                 Text(
@@ -1357,10 +1233,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
             ),
             isAssing
                 ? const SizedBox()
-                : _listTileButton("Toplamaya Başla", Icons.download_rounded,
-                    Colors.white, const Color(0xffff9700), () {
-                    showDialogForAssingOrder(
-                        context, true, "Siparişi görevlenmeye emin misiniz ?");
+                : _listTileButton("Toplamaya Başla", Icons.download_rounded, Colors.white, const Color(0xffff9700), () {
+                    showDialogForAssingOrder(context, true, "Siparişi görevlenmeye emin misiniz ?");
                   }),
             isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
                 ? _listTileButton(
@@ -1373,33 +1247,25 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => PurchaseOrderScanPage(
-                                    purchaseOrderDetailItemList:
-                                        orderDetailItemList,
+                                    purchaseOrderDetailItemList: orderDetailItemList,
                                     purchaseOrderId: widget.purchaseOrderId,
                                     // customerId:
                                     //     response.order!.customer!.customerId!,
                                   ))).then((value) async {
-                        var results =
-                            await _dbHelper.getPurchaseOrderDetailItemList(
-                                widget.purchaseOrderId);
+                        var results = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
                         orderDetailItemList = results;
                         setState(() {});
                       });
                     },
                   )
                 : const SizedBox(),
-            isAuthPurchaseCancelAssign &&
-                    isAssing &&
-                    isAssingedPersonIsCurrenUser &&
-                    !isThisInMultiOrder!
-                ? _listTileButton("Atamayı Kaldır", Icons.inbox, Colors.black,
-                    const Color(0xff8a9c9c), () {
+            isAuthPurchaseCancelAssign && isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
+                ? _listTileButton("Atamayı Kaldır", Icons.inbox, Colors.black, const Color(0xff8a9c9c), () {
                     _complateOrder();
                   })
                 : const SizedBox(),
             isAssing && isAssingedPersonIsCurrenUser && !isThisInMultiOrder!
-                ? _listTileButton("Sevk Et", Icons.fire_truck, Colors.black,
-                    const Color(0xffe64a19), () async {
+                ? _listTileButton("Sevk Et", Icons.fire_truck, Colors.black, const Color(0xffe64a19), () async {
                     /*
                     _showLoadingScreen(true, "İrsaliye Oluşturuluyor");
                     waybillRequestBody = _createWaybillBodyNew();
@@ -1423,27 +1289,22 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
 
                     _showLoadingScreen(true, "İrsaliye Oluşturuluyor");
 
-                    if (isCustomerInRiskLimit) {
+                    if (!isCustomerInRiskLimit) {
                       _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                       _showDialogMessage("Müşteri Risk Limitine Takıldı",
                           "İrsaliye oluşturulmadı, sipariş ücreti risk limitinin arasındaki fark: \n $differenceWithRiskLimit");
                     } else {
                       // await _changeWarehouseBasedOnItems();
-                      bool isWaybillItemNotEmpty =
-                          _checkForWaybillItemsNotEmpty();
+                      bool isWaybillItemNotEmpty = _checkForWaybillItemsNotEmpty();
                       if (isWaybillItemNotEmpty) {
                         waybillRequestBody = await _createWaybillBodyNew();
                         try {
-                          bool isDone = await apiRepository
-                              .createWaybillPurchaseOrder(waybillRequestBody!);
+                          bool isDone = await apiRepository.createWaybillPurchaseOrder(waybillRequestBody!);
 
-                          bool isAllItemCollected =
-                              _checkAllItemsCollectedCompletely();
+                          bool isAllItemCollected = _checkAllItemsCollectedCompletely();
                           if (isAllItemCollected) {
                             orderStatusId = EntityConstants.OrderStatusKapandi;
-                            orderStatusName =
-                                EntityConstants.getStatusDescription(
-                                    orderStatusId);
+                            orderStatusName = EntityConstants.getStatusDescription(orderStatusId);
                             await _changePurchaseOrderStatusRequest();
                           }
 
@@ -1451,15 +1312,12 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                             bool isCreated = await _completeTheOrder2();
                             if (isCreated) {
                               _deletePurchaseOrderSummaryOnLocal();
-                              _showLoadingScreen(
-                                  false, "İrsaliye Oluşturuluyor");
+                              _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                               // _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
                               _showDialogMessage("Başarılı", "İşlem Başarılı");
                             } else {
-                              _showLoadingScreen(
-                                  false, "İrsaliye Oluşturuluyor");
-                              _showErrorMessage(
-                                  "İrsaliye oluşturuldu, Sipariş bırakılamadı !");
+                              _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
+                              _showErrorMessage("İrsaliye oluşturuldu, Sipariş bırakılamadı !");
                             }
                           } else {
                             _showLoadingScreen(false, "İrsaliye Oluşturuluyor");
@@ -1494,15 +1352,13 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     if (!isPartialOrder) {
       if (_isScannedQtyEqualQty()) {
         print("bütün itemlar eşit");
-        showDialogForAssingOrder(
-            context, false, "Siparişi bırakmak istediğinize emin misiniz ?");
+        showDialogForAssingOrder(context, false, "Siparişi bırakmak istediğinize emin misiniz ?");
       } else {
         print("bütün itemlar eşit değil");
         _showErrorMessage("Bütün siparişleri tamamlamadınız.");
       }
     } else {
-      showDialogForAssingOrder(
-          context, false, "Siparişi bırakmak istediğinize emin misiniz ?");
+      showDialogForAssingOrder(context, false, "Siparişi bırakmak istediğinize emin misiniz ?");
     }
   }
 
@@ -1629,36 +1485,30 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "İrsaliye Tipi",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: waybillTypeItem.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(
-                              waybillTypeItem[index].type, () {
-                            waybillTypeName = waybillTypeItem[index].type;
-                            waybillTypeId = waybillTypeItem[index].id;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: waybillTypeItem.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(waybillTypeItem[index].type, () {
+                        waybillTypeName = waybillTypeItem[index].type;
+                        waybillTypeId = waybillTypeItem[index].id;
 
-                            print("$waybillTypeName  $waybillTypeId");
-                            Navigator.pop(context);
-                            setState(() {});
-                          });
-                        },
-                      )
-                    ]),
+                        print("$waybillTypeName  $waybillTypeId");
+                        Navigator.pop(context);
+                        setState(() {});
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -1667,8 +1517,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     );
   }
 
-  Row _selectOrderStatusFromList(
-      String initTitle, String title, Function()? onTap) {
+  Row _selectOrderStatusFromList(String initTitle, String title, Function()? onTap) {
     return Row(
       children: [
         Expanded(
@@ -1696,8 +1545,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color:
-                      title == initTitle ? Colors.blueGrey[200] : Colors.black,
+                  color: title == initTitle ? Colors.blueGrey[200] : Colors.black,
                 ),
               ),
             ),
@@ -1756,8 +1604,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   void showOrderStatusBottomSheet() {
     showModalBottomSheet(
       context: context,
-      builder: (context) =>
-          _selectOrderStatusBottomSheet(EntityConstants.OrderStatusList),
+      builder: (context) => _selectOrderStatusBottomSheet(EntityConstants.OrderStatusList),
     );
   }
 
@@ -1791,37 +1638,30 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Sipariş Durumları",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: orderStasuses.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(orderStasuses[index],
-                              () async {
-                            orderStatusName = orderStasuses[index];
-                            orderStatusId = EntityConstants.getStatusId(
-                                orderStasuses[index]);
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: orderStasuses.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(orderStasuses[index], () async {
+                        orderStatusName = orderStasuses[index];
+                        orderStatusId = EntityConstants.getStatusId(orderStasuses[index]);
 
-                            await _changePurchaseOrderStatusRequest();
-                            setState(() {});
-                            Navigator.pop(context);
-                          });
-                        },
-                      )
-                    ]),
+                        await _changePurchaseOrderStatusRequest();
+                        setState(() {});
+                        Navigator.pop(context);
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -1830,8 +1670,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     );
   }
 
-  Row _openBottomSheetAndSelectFromTile(
-      String initTitle, String title, Function()? onTap) {
+  Row _openBottomSheetAndSelectFromTile(String initTitle, String title, Function()? onTap) {
     return Row(
       children: [
         Expanded(
@@ -1859,8 +1698,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color:
-                      title == initTitle ? Colors.blueGrey[200] : Colors.black,
+                  color: title == initTitle ? Colors.blueGrey[200] : Colors.black,
                 ),
               ),
             ),
@@ -1924,10 +1762,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
           children: [
             Text(
               "Son Yapılan İşlemler",
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[500]),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey[500]),
             )
           ],
         ),
@@ -1998,13 +1833,11 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
 
   Future<void> _changeWarehouseBasedOnItems() async {
     if (orderDetailItemList!.length == 1) {
-      if (warehouseId.toLowerCase() !=
-          orderDetailItemList![0].warehouseId!.toLowerCase()) {
+      if (warehouseId.toLowerCase() != orderDetailItemList![0].warehouseId!.toLowerCase()) {
         warehouseId = orderDetailItemList![0].warehouseId!;
         var result = await apiRepository.getWarehouseReverse(warehouseId);
         departmentId = result.warehouse?.departments?.departmentId ?? "";
-        workplaceId =
-            result.warehouse?.departments?.workplace?.workplaceId ?? "";
+        workplaceId = result.warehouse?.departments?.workplace?.workplaceId ?? "";
       }
     } else if (orderDetailItemList!.length > 1) {
       int maxScannedQty = -1;
@@ -2029,14 +1862,12 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     }
   }
 
-  Padding _listTileButton(String content, IconData icon, Color textColor,
-      Color backgroundColor, VoidCallback? onTap) {
+  Padding _listTileButton(String content, IconData icon, Color textColor, Color backgroundColor, VoidCallback? onTap) {
     return Padding(
       padding: const EdgeInsets.only(top: 5),
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(
-              30), // Kenar yuvarlaklığını burada ayarlayabilirsiniz
+          borderRadius: BorderRadius.circular(30), // Kenar yuvarlaklığını burada ayarlayabilirsiniz
         ),
         color: backgroundColor,
         child: InkWell(
@@ -2141,15 +1972,11 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
 
   AppBar _appBar() {
     return AppBar(
-      iconTheme: IconThemeData(
-          color: Colors.deepOrange[700], size: 32 //change your color here
+      iconTheme: IconThemeData(color: Colors.deepOrange[700], size: 32 //change your color here
           ),
       title: Text(
         "Satın Alma Sipariş Detayı",
-        style: TextStyle(
-            color: Colors.deepOrange[700],
-            fontWeight: FontWeight.bold,
-            fontSize: 20),
+        style: TextStyle(color: Colors.deepOrange[700], fontWeight: FontWeight.bold, fontSize: 20),
         textAlign: TextAlign.center,
       ),
       centerTitle: true,
@@ -2199,8 +2026,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   }
 
   Future<String> _getDocNumberFicheNumber() async {
-    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(
-        apiRepository.employeeUid, "6");
+    getFicheNumberResponse = await apiRepository.getDocNumberFicheNumber(apiRepository.employeeUid, "6");
 
     return getFicheNumberResponse?.docnumber?.lastNum ?? "";
   }
@@ -2208,9 +2034,8 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   Future<WayybillsRequestBodyNew> _createWaybillBodyNew() async {
     return WayybillsRequestBodyNew(
       customerId: response.order?.customer?.customerId,
-      ficheNo: ficheNoThatCreatedByUser.isEmpty
-          ? await _getDocNumberFicheNumber()
-          : ficheNoThatCreatedByUser,
+      orderId: response.order?.orderId ?? guidEmpty,
+      ficheNo: ficheNoThatCreatedByUser.isEmpty ? await _getDocNumberFicheNumber() : ficheNoThatCreatedByUser,
       // ficheDate: DateFormat('yyyy-MM-dd')
       //     .format(DateTime.parse(response.order!.ficheDate!)),
       // ficheDate: DateFormat('yyyy-MM-dd').format(currentDate),
@@ -2222,25 +2047,21 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       ficheTime: DateFormat('HH:mm').format(currentDate),
 
       docNo: response.order?.docNo,
-      erpInvoiceRef: "deneme",
+      erpInvoiceRef: "",
       workPlaceId: workplaceId,
       department: departmentId,
       warehouse: warehouseId,
-      currencyId: response.order?.currencyId,
+      currencyId: 1,
       totaldiscounted: response.order?.totaldiscounted,
       totalvat: response.order?.totalvat,
       grossTotal: response.order?.grossTotal,
       transporterId: response.order?.transporter?.transporterId ?? guidEmpty,
-      shippingAccountId:
-          response.order?.shippingAccount?.customerId ?? guidEmpty,
-      shippingAddressId:
-          response.order?.shippingAddress?.shippingAddressId ?? guidEmpty,
+      shippingAccountId: response.order?.shippingAccount?.customerId ?? guidEmpty,
+      shippingAddressId: response.order?.shippingAddress?.shippingAddressId ?? guidEmpty,
       description: "deneme",
-      shippingTypeId:
-          response.order?.orderShippingType?.shippingTypeId ?? guidEmpty,
-      salesmanId:
-          response.order?.shippingAccount?.salesman?.salesmanId ?? guidEmpty,
-      waybillStatusId: 1,
+      shippingTypeId: response.order?.orderShippingType?.shippingTypeId ?? guidEmpty,
+      salesmanId: response.order?.shippingAccount?.salesman?.salesmanId ?? guidEmpty,
+      waybillStatusId: 2,
       erpId: "",
       erpCode: "",
       waybillTypeId: waybillTypeId,
@@ -2310,43 +2131,39 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
         var element = response.order!.orderItems![j];
 
         if (localElement.productId == element.product!.productId) {
-          if (localElement.scannedQty!.toInt() - element.shippedQty!.toInt() !=
-              0) {
+          if (localElement.scannedQty!.toInt() - element.shippedQty!.toInt() != 0) {
             List<PurchaseOrderDetailScannedItemDB>? scannedList = [];
             bool isProductLocation = localElement.isProductLocatin!;
 
             // Eğer ürün lokasyonu varsa scannedList'i doldur
             if (isProductLocation) {
-              scannedList = await _dbHelper.getPurchaseOrderDetailScannedItem(
-                  widget.item.ficheNo!, localElement.orderItemId!);
+              scannedList =
+                  await _dbHelper.getPurchaseOrderDetailScannedItem(widget.item.ficheNo!, localElement.orderItemId!);
             }
 
             // WaybillItemsNew listesine yeni bir öğe ekle
             waybillItemsList.add(
               WaybillItemsNew(
                 productId: element.product?.productId,
+                orderLineId: element.orderItemId,
                 description: element.description,
                 warehouseId: localElement.warehouseId,
                 productPrice: element.productPrice,
-                qty: (localElement.scannedQty!.toInt() -
-                    element.shippedQty!.toInt()),
+                qty: (localElement.scannedQty!.toInt() - element.shippedQty!.toInt()),
                 total: element.total,
                 discount: element.discount,
                 tax: element.tax,
                 nettotal: element.nettotal,
                 unitId: element.unitId,
                 unitConversionId: element.unitConversionId,
-                stockLocationRelations: isProductLocation
-                    ? _createStockLocationRelationList(scannedList!)
-                    : [],
+                stockLocationRelations: isProductLocation ? _createStockLocationRelationList(scannedList!) : [],
                 currencyId: 1,
                 erpId: element.erpId,
                 erpCode: element.erpCode,
                 orderReferance: element.orderItemId,
-                erpOrderReferance: 0,
+                erpOrderReferance: int.parse(element.erpId.toString()),
                 waybillItemTypeId: 0,
-                waybillItemDetails:
-                    _createWaybillItemDetails(element.orderItemId!),
+                waybillItemDetails: _createWaybillItemDetails(element.orderItemId!),
               ),
             );
           }
@@ -2357,8 +2174,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     return waybillItemsList;
   }
 
-  List<StockLocationRelations> _createStockLocationRelationList(
-      List<PurchaseOrderDetailScannedItemDB> scannedList) {
+  List<StockLocationRelations> _createStockLocationRelationList(List<PurchaseOrderDetailScannedItemDB> scannedList) {
     // Map oluşturup stockLocationId'yi key olarak kullanacağız ve numberOfPieces'ları toplayacağız
     Map<String, int> locationMap = {};
 
@@ -2366,8 +2182,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       if (item.stockLocationId != null && item.numberOfPieces != null) {
         if (locationMap.containsKey(item.stockLocationId)) {
           // Eğer stockLocationId map'te varsa, qty'ye numberOfPieces'ı ekle
-          locationMap[item.stockLocationId!] =
-              locationMap[item.stockLocationId!]! + item.numberOfPieces!;
+          locationMap[item.stockLocationId!] = locationMap[item.stockLocationId!]! + item.numberOfPieces!;
         } else {
           // Eğer stockLocationId map'te yoksa, yeni bir giriş oluştur
           locationMap[item.stockLocationId!] = item.numberOfPieces!;
@@ -2378,8 +2193,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     // Map'teki verileri StockLocationRelations nesnelerine dönüştür
     List<StockLocationRelations> stockLocationRelationsList = [];
     locationMap.forEach((stockLocationId, qty) {
-      stockLocationRelationsList.add(
-          StockLocationRelations(stockLocationId: stockLocationId, qty: qty));
+      stockLocationRelationsList.add(StockLocationRelations(stockLocationId: stockLocationId, qty: qty));
     });
 
     return stockLocationRelationsList;
@@ -2453,11 +2267,9 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
   void selectWarehouseReverseForAllItems() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => _selectWarehouseByAllWarehousBottomSheet(
-          isThereWarehouseBoundForUser
-              ? _limitWarehouseBasedOnSetting(
-                  allWarehouse, userSpecialWarehouseList)
-              : allWarehouse),
+      builder: (context) => _selectWarehouseByAllWarehousBottomSheet(isThereWarehouseBoundForUser
+          ? _limitWarehouseBasedOnSetting(allWarehouse, userSpecialWarehouseList)
+          : allWarehouse),
     );
   }
 
@@ -2466,8 +2278,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
       context: context,
       builder: (context) => _selectWarehouseForOnlyOneBottomSheet(
           isThereWarehouseBoundForUser
-              ? _limitWarehouseBasedOnSetting(
-                  allWarehouse, userSpecialWarehouseList)
+              ? _limitWarehouseBasedOnSetting(allWarehouse, userSpecialWarehouseList)
               : allWarehouse,
           orderItemId),
     );
@@ -2486,8 +2297,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     return list;
   }
 
-  Widget _selectWarehouseByAllWarehousBottomSheet(
-      List<WorkplaceWarehouse> warehouse) {
+  Widget _selectWarehouseByAllWarehousBottomSheet(List<WorkplaceWarehouse> warehouse) {
     double leftPadding = 8.0;
     return Container(
       width: double.infinity,
@@ -2517,61 +2327,44 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Warehouse",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: warehouse.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(warehouse[index].code!,
-                              () async {
-                            warehouseName = warehouse[index].code!;
-                            warehouseId = warehouse[index].warehouseId!;
-                            setState(() {
-                              isLoading = true;
-                            });
-                            var response = await apiRepository
-                                .getWarehouseReverse(warehouseId);
-                            for (int i = 0;
-                                i < orderDetailItemList!.length;
-                                i++) {
-                              await _dbHelper
-                                  .updatePurchaseOrderDetailItemWarehouse(
-                                      widget.purchaseOrderId,
-                                      orderDetailItemList![i].orderItemId!,
-                                      warehouseId,
-                                      warehouseName);
-                            }
-                            orderDetailItemList =
-                                await _dbHelper.getPurchaseOrderDetailItemList(
-                                    widget.purchaseOrderId);
-                            setState(() {
-                              isLoading = false;
-                            });
-                            workplaceId = response.warehouse!.departments!
-                                .workplace!.workplaceId!;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: warehouse.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(warehouse[index].code!, () async {
+                        warehouseName = warehouse[index].code!;
+                        warehouseId = warehouse[index].warehouseId!;
+                        setState(() {
+                          isLoading = true;
+                        });
+                        var response = await apiRepository.getWarehouseReverse(warehouseId);
+                        for (int i = 0; i < orderDetailItemList!.length; i++) {
+                          await _dbHelper.updatePurchaseOrderDetailItemWarehouse(
+                              widget.purchaseOrderId, orderDetailItemList![i].orderItemId!, warehouseId, warehouseName);
+                        }
+                        orderDetailItemList = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
+                        setState(() {
+                          isLoading = false;
+                        });
+                        workplaceId = response.warehouse!.departments!.workplace!.workplaceId!;
 
-                            departmentId =
-                                response.warehouse!.departments!.departmentId!;
+                        departmentId = response.warehouse!.departments!.departmentId!;
 
-                            Navigator.pop(context);
-                            setState(() {});
-                          });
-                        },
-                      )
-                    ]),
+                        Navigator.pop(context);
+                        setState(() {});
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -2580,8 +2373,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     );
   }
 
-  Widget _selectWarehouseForOnlyOneBottomSheet(
-      List<WorkplaceWarehouse> warehouse, String orderItemId) {
+  Widget _selectWarehouseForOnlyOneBottomSheet(List<WorkplaceWarehouse> warehouse, String orderItemId) {
     double leftPadding = 8.0;
     return Container(
       width: double.infinity,
@@ -2611,46 +2403,34 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     "Warehouse",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                 ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        primary: false,
-                        shrinkWrap: true,
-                        itemCount: warehouse.length,
-                        itemBuilder: (context, index) {
-                          return _selectingAreaRowItem(warehouse[index].code!,
-                              () async {
-                            var newWarehouseName = warehouse[index].code!;
-                            var newWarehouseId = warehouse[index].warehouseId!;
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: warehouse.length,
+                    itemBuilder: (context, index) {
+                      return _selectingAreaRowItem(warehouse[index].code!, () async {
+                        var newWarehouseName = warehouse[index].code!;
+                        var newWarehouseId = warehouse[index].warehouseId!;
 
-                            await _dbHelper
-                                .updatePurchaseOrderDetailItemWarehouse(
-                                    widget.purchaseOrderId,
-                                    orderItemId,
-                                    newWarehouseId,
-                                    newWarehouseName);
+                        await _dbHelper.updatePurchaseOrderDetailItemWarehouse(
+                            widget.purchaseOrderId, orderItemId, newWarehouseId, newWarehouseName);
 
-                            orderDetailItemList =
-                                await _dbHelper.getPurchaseOrderDetailItemList(
-                                    widget.purchaseOrderId);
+                        orderDetailItemList = await _dbHelper.getPurchaseOrderDetailItemList(widget.purchaseOrderId);
 
-                            Navigator.pop(context);
-                            setState(() {});
-                          });
-                        },
-                      )
-                    ]),
+                        Navigator.pop(context);
+                        setState(() {});
+                      });
+                    },
+                  )
+                ]),
               ),
             ),
           ],
@@ -2675,8 +2455,7 @@ class _PurchaseOrderDetailRemoteState extends State<PurchaseOrderDetailRemote> {
     );
   }
 
-  List<WorkplaceWarehouse> _limitWarehouseBasedOnSetting(
-      List<WorkplaceWarehouse> mainList, List<String> limitedList) {
+  List<WorkplaceWarehouse> _limitWarehouseBasedOnSetting(List<WorkplaceWarehouse> mainList, List<String> limitedList) {
     List<WorkplaceWarehouse> newList = [];
     mainList.forEach((element) {
       limitedList.forEach((warehouseId) {
